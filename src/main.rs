@@ -192,10 +192,10 @@ pub unsafe fn env_init() {
 
 fn main() {
     println!("Hello, world!");
-    // let file_txt = http::open_file();
-    // println!("{}", file_txt);
-    // let scp1o = serde_json::from_slice().map_err(Into::into);
-    // scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+    let file_txt = http::open_file();
+    println!("{}", file_txt.unwrap());
+    let scp1o = serde_json::from_slice(&*file_txt.unwrap().into_bytes()).map_err(Into::into);
+    scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
 }
 
 pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(

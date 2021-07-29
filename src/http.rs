@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Error;
 use std::convert::AsMut;
 use std::fs::File;
 use std::io::Read;
@@ -33,12 +34,13 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-pub fn open_file() {
-    let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
+pub fn open_file() -> Result<String, Error> {
+    // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
+    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
     print!("{}", contents);
-    // Ok((contents));
+    Ok(contents)
 }
 
 
