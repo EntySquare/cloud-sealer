@@ -17,3 +17,5 @@ storage-proofs-core = { version = "8.0.3" }
 filecoin-proofs = { version = "8.0.2" }
 paired = { version = "0.22.0" }
 anyhow = { version = "1.0.42" }
+unsigned-varint = "0.7.0"
+resize-slice = "0.1.3"

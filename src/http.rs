@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 use std::fmt::Error;
+use std::convert::AsMut;
 use std::fs::File;
 use std::io::Read;
 
+use resize_slice::ResizeSlice;
 use serde_json::to_string;
 use serde_json::value::Value;
+use unsigned_varint::encode;
 
 struct Commit1Resp {
     c1out: Vec<u8>,
@@ -39,6 +42,60 @@ pub fn open_file() -> Result<String, Error> {
     print!("{}", contents);
     Ok(contents)
 }
+
+
+#[test]
+pub fn test_unsigned_varint() {
+    // let mut buf2 :  [u8; 32];
+    let mut buf = [0; 32];
+    let mut buf2 = &mut [0; 32];
+    // let mut buf =encode::u64_buffer();
+    // encode::u64(n, &mut buf));
+    let miner_id: u64 = 23443345;
+    let mut prover_id = u642(miner_id, &mut buf);
+
+    for i in 0..32 {
+        if i< prover_id.len(){
+            buf2[i]=prover_id[i];
+        }
+    }
+
+
+    println!("C2 — prover_id: {:?}", buf2);
+}
+
+fn clone_into_array<A, T>(slice: &[T]) -> A
+    where
+
+        A: Default + AsMut<[T]>,
+        T: Clone,
+
+{
+    let mut a = A::default();
+
+    <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
+
+    a
+}
+
+
+#[inline]
+pub fn u642(number: u64, buf: &mut [u8; 32]) -> &[u8] {
+    let mut n = number;
+    let mut i = 0;
+    for b in buf.iter_mut() {
+        *b = n as u8 | 0x80;
+        n >>= 7;
+        if n == 0 {
+            *b &= 0x7f;
+            break;
+        }
+        i += 1
+    }
+    debug_assert_eq!(n, 0);
+    &buf[0..=i]
+}
+
 
 // #[tokio::main]
 // #[test]
