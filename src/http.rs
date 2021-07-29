@@ -1,9 +1,9 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Read;
 
 use serde_json::to_string;
 use serde_json::value::Value;
-use std::fs::File;
-use std::io::Read;
 
 struct Commit1Resp {
     c1out: Vec<u8>,
@@ -30,11 +30,12 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 #[test]
-fn open_file(){
-    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
+pub fn open_file(){
+    let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
     print!("{}", contents);
+    // Ok((contents));
 }
 
 // #[tokio::main]
