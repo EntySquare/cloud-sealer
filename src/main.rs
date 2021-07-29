@@ -29,17 +29,17 @@ static mut reserveGiBForSystemAndUnsealedSector: u64 = 500;
 static mut copyFullGiB: u64 = 0;
 static mut sectorMinerID: u64 = 0;
 static mut sectorNumber: u64 = 0;
-static mut params: &[u8] = "none".as_bytes();
 
-pub const RegisteredSealProof_StackedDrg2KiBV1: u64 = 0;
-pub const RegisteredSealProof_StackedDrg32GiBV1: u64 = 3;
-pub const RegisteredSealProof_StackedDrg32GiBV1_1: u64 = 8;
-pub const SECTOR_TYPE_2k: &str = "2KiB";
-pub const READ_PIECE: &str = "read-piece";
-pub const WINNING_POST: &str = "winning-post";
-pub const WINDOW_POST: &str = "window-post";
+static mut params :Vec<u8> = vec![];
 
-pub unsafe fn env_init() {
+pub const RegisteredSealProof_StackedDrg2KiBV1:u64 = 0;
+pub const RegisteredSealProof_StackedDrg32GiBV1:u64 = 3;
+pub const RegisteredSealProof_StackedDrg32GiBV1_1:u64 = 8;
+pub const SECTOR_TYPE_2k:&str = "2KiB";
+pub const READ_PIECE :&str = "read-piece";
+pub const WINNING_POST :&str = "winning-post";
+pub const WINDOW_POST :&str = "window-post";
+pub unsafe fn env_init(){
     let mut key = "EVENTING";
     match env::var(key) {
         Ok(_) => unsafe {
@@ -96,12 +96,13 @@ pub unsafe fn env_init() {
     key = "PROOF_TYPE";
     match env::var(key) {
         Ok(val) => {
-            if (val == "3") {
-                proofType = RegisteredSealProof_StackedDrg32GiBV1;
-            } else if (val == "8") {
-                proofType = RegisteredSealProof_StackedDrg32GiBV1_1;
+            if(val == "3"){
+               proofType= RegisteredSealProof_StackedDrg32GiBV1;
             }
-        }
+            else if (val == "8") {
+               proofType= RegisteredSealProof_StackedDrg32GiBV1_1;
+            }
+        },
         Err(e) => proofType = RegisteredSealProof_StackedDrg32GiBV1,
     }
     key = "SECTOR_MINER_ID";
@@ -109,23 +110,21 @@ pub unsafe fn env_init() {
         Ok(val) => {
             minerIDStr = val.to_owned();
             sectorMinerID = val.parse::<u64>().unwrap();
-            ;
-        }
+        },
         Err(e) => sectorMinerID = "0".parse::<u64>().unwrap(),
     }
     key = "SECTOR_NUMBER";
     match env::var(key) {
         Ok(val) => {
             sectorNumber = val.parse::<u64>().unwrap();
-            ;
-        }
+        },
         Err(e) => sectorNumber = "0".parse::<u64>().unwrap(),
     }
     key = "TASK_SECTOR_TYPE";
     match env::var(key) {
         Ok(val) => {
             taskSectorType = val.to_owned();
-        }
+        },
         Err(e) => taskSectorType = String::from(""),
     }
     if taskSectorType == SECTOR_TYPE_2k {};
@@ -133,63 +132,64 @@ pub unsafe fn env_init() {
     match env::var(key) {
         Ok(val) => {
             taskTyp = val.to_owned();
-        }
+        },
         Err(e) => println!("task not defined : {}", e),
     }
     key = "JOB_POD_NAME";
     match env::var(key) {
         Ok(val) => {
-            match env::var(val) {
-                Ok(addrs) => {
-                    // podIp = addrs;
-                    // println!("current pod IP is : ", podIp)
-                }
-                Err(e) => panic!(e),
-            }
-        }
+           match env::var(val){
+               Ok(addrs) => {
+                   // podIp = addrs;
+                   // println!("current pod IP is : ", podIp)
+               },
+               Err(e) => panic!(e),
+           }
+        },
         Err(_) => {
-            if taskTyp == READ_PIECE || taskTyp == WINDOW_POST || taskTyp == WINNING_POST {} else {
+            if taskTyp == READ_PIECE || taskTyp == WINDOW_POST || taskTyp == WINNING_POST {
+            } else {
                 panic!("fail to seek JOB_POD_NAME : {}");
             }
-        }
+        },
     }
     key = "RESERVE_GIB_FOR_COPY_SECTOR";
     match env::var(key) {
         Ok(val) => {
             copyFullGiB = val.parse::<u64>().unwrap();
-        }
+        },
         _ => {}
     }
     key = "PARAMS";
     match env::var(key) {
         Ok(val) => {
-            println!("params =>{}", val);
-            if taskTyp == WINDOW_POST {} else {
-                params = ("test").as_ref();
+            println!("params =>{}",val);
+            if taskTyp == WINDOW_POST {
+            } else {
+                params = base64::decode(val.clone()).unwrap();
             }
-        }
+        },
         _ => {}
     }
     key = "RESERVE_GIB_FOR_SYSTEM_AND_LAST_UNSEALED_SECTOR";
     match env::var(key) {
         Ok(val) => {
             reserveGiBForSystemAndUnsealedSector = val.parse::<u64>().unwrap();
-        }
+        },
         Err(_) => reserveGiBForSystemAndUnsealedSector = 500,
     }
     key = "JOB_NODE_NAME";
     match env::var(key) {
         Ok(val) => {
-            jobNodeName = val.to_owned();
-        }
-        Err(_) => {
+           jobNodeName = val.to_owned();
+        },
+        Err(_) =>{
             if taskTyp == READ_PIECE {
-                println!("JOB_NODE_NAME env have not set")
+               println!("JOB_NODE_NAME env have not set")
             }
         }
     }
 }
-
 fn main() {
     println!("Hello, world!");
 
