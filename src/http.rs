@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use serde_json::to_string;
 use serde_json::value::Value;
+use std::fs::File;
+use std::io::Read;
 
 struct Commit1Resp {
     c1out: Vec<u8>,
@@ -9,7 +11,7 @@ struct Commit1Resp {
 
 #[tokio::main]
 #[test]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
     let resp = client.post("http://0.0.0.0:7788/cloud")
         .body("the exact body that is sent")
@@ -17,24 +19,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .json::<HashMap<String, String>>().await?;
 
-    // let resp = reqwest::get("https://httpbin.org/ip")
-    //     .await?
-    //     .json::<HashMap<String, String>>()
-    //     .await?;
     println!("resp={:#?}", resp);
     let value_key = resp.get("c1out").unwrap().clone();
-    // println!("string={:#?}", resp.get("c1out"));
-
     println!("string={:#?}", value_key.to_string());
     let mut obj = Commit1Resp { c1out: vec![] };
     obj.c1out = value_key.into_bytes();
     println!("test={:#?}", obj.c1out);
     println!("test={ }", "success");
-
-
-    // let decoded: TestStruct = json::decode(&encoded).unwrap();
-    // println!("{:?}",decoded.data_vector);
     Ok(())
+}
+
+#[test]
+fn open_file(){
+    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    print!("{}", contents);
 }
 
 // #[tokio::main]

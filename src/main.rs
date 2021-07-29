@@ -9,6 +9,7 @@ use filecoin_proofs_api::seal::{SealCommitPhase1Output, SealCommitPhase2Output};
 use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
 use paired::bls12_381::Fr;
+use anyhow::Result;
 
 mod http;
 
@@ -193,16 +194,15 @@ pub unsafe fn env_init(){
 fn main() {
     println!("Hello, world!");
 
-    let scp1o = serde_json::from_slice(&[]).map_err(Into::into);
-    scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+    // let scp1o = serde_json::from_slice().map_err(Into::into);
+    // scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
 }
-
 
 pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(
     phase1_output: SealCommitPhase1Output,
     prover_id: ProverId,
     sector_id: SectorId,
-) -> Result<SealCommitPhase2Output, E> {
+) -> Result<SealCommitPhase2Output> {
     let SealCommitPhase1Output {
         vanilla_proofs,
         comm_r,
