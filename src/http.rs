@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use serde_json::value::Value;
 use serde_json::to_string;
-struct Commit1Resp  {
+use serde_json::value::Value;
+
+struct Commit1Resp {
     c1out: Vec<u8>,
 }
 
@@ -25,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // println!("string={:#?}", resp.get("c1out"));
 
     println!("string={:#?}", value_key.to_string());
-    let mut obj = Commit1Resp{ c1out: vec![] };
+    let mut obj = Commit1Resp { c1out: vec![] };
     obj.c1out = value_key.into_bytes();
     println!("test={:#?}", obj.c1out);
     println!("test={ }", "success");
