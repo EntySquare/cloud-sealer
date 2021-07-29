@@ -36,8 +36,6 @@ cloud sealer native seal_commit_phase2
     ProverId = [u8; 32];
 
     SectorId(u64);
-  
 
-    }    
 
     Result<SealCommitOutput>
