@@ -4,6 +4,7 @@ use std::env;
 
 use std::env::VarError;
 use base64::{encode, decode};
+use filecoin_proofs::types::SealCommitOutput;
 
   static mut eventing : bool = false;
   static mut debug : bool = false;
@@ -187,4 +188,43 @@ pub unsafe fn env_init(){
 }
 fn main() {
     println!("Hello, world!");
+
+    let scp1o = serde_json::from_slice().map_err(Into::into);
+    scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+
+}
+
+
+pub fn seal_commit_phase2(
+    phase1_output: SealCommitPhase1Output,
+    prover_id: ProverId,
+    sector_id: SectorId,
+) ->Result<SealCommitOutput> {
+    let SealCommitPhase1Output {
+        vanilla_proofs,
+        comm_r,
+        comm_d,
+        replica_id,
+        seed,
+        ticket,
+        registered_proof,
+    } = phase1_output;
+
+    let config = registered_proof.as_v1_config();
+    let replica_id: Fr = replica_id.into();
+
+    let co = filecoin_proofs_v1::types::SealCommitPhase1Output {
+        vanilla_proofs: vanilla_proofs.try_into()?,
+        comm_r,
+        comm_d,
+        replica_id: replica_id.into(),
+        seed,
+        ticket,
+    };
+
+    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sector_id)?;
+
+    Ok(SealCommitPhase2Output {
+        proof: output.proof,
+    })
 }
