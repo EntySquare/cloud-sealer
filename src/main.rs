@@ -1,38 +1,38 @@
 use std::env;
-use lazy_static::lazy_static;
-use std::env::VarError;
-lazy_static! {
-  mut eventing : bool = false;
-  mut debug : bool = false;
-  mut persisting : bool = false;
-  mut tmpPath : String = "./tmp";
-  mut natsUrl : String = "http://localhost:4222";
-  mut sectorDir : String = "pod";
-  mut minerIP : String = "127.0.0.1";
-  mut minerIDStr : String = "0";
-  mut jobNodeName : String = "0";
-  mut taskSectorType : String = "";
-  mut taskTyp : String = "";
-  mut podIp : String = "";
-  mut proofType : u64 ;
-  mut reserveGiBForSystemAndUnsealedSector : u64 = 500;
-  mut copyFullGiB : u64 ;
-  mut sectorMinerID : u64 ;
-  mut sectorNumber : u64 ;
-//  mut params : []byte ;
 
-}
+use std::env::VarError;
+use base64::{encode, decode};
+
+  static mut eventing : bool = false;
+  static mut debug : bool = false;
+  static mut persisting : bool = false;
+  static mut tmpPath : String =String::new() ;
+  static mut natsUrl : String =String::new();
+  static mut sectorDir : String =String::new();
+  static mut minerIP : String =String::new();
+  static mut minerIDStr : String =String::new();
+  static mut jobNodeName : String =String::new();
+  static mut taskSectorType : String =String::new();
+  static mut taskTyp : String =String::new();
+  static mut podIp : String =String::new();
+  static mut proofType : u64 =0;
+  static mut reserveGiBForSystemAndUnsealedSector : u64 = 500;
+  static mut copyFullGiB : u64 =0;
+  static mut sectorMinerID : u64 =0;
+  static mut sectorNumber : u64 =0;
+  static mut params : &[u8] = "none".as_bytes();
+
 pub const RegisteredSealProof_StackedDrg2KiBV1:u64 = 0;
 pub const RegisteredSealProof_StackedDrg32GiBV1:u64 = 3;
 pub const RegisteredSealProof_StackedDrg32GiBV1_1:u64 = 8;
-pub const SECTOR_TYPE_2k:&str  = "2KiB";
+pub const SECTOR_TYPE_2k:&str = "2KiB";
 pub const READ_PIECE :&str = "read-piece";
 pub const WINNING_POST :&str = "winning-post";
 pub const WINDOW_POST :&str = "window-post";
-pub fn env_init(){
+pub unsafe fn env_init(){
     let mut key = "EVENTING";
     match env::var(key) {
-        Ok(_) => {
+        Ok(_) => unsafe {
             eventing = false;
         },
         Err(_) => eventing = true
@@ -54,42 +54,42 @@ pub fn env_init(){
     key = "TMP_PATH";
     match env::var(key) {
         Ok(val) => {
-            tmpPath = val;
+            tmpPath = val.to_owned();
         },
-        Err(_) => tmpPath = "./tmp",
+        Err(_) => tmpPath = "./tmp".to_string(),
     }
     key = "NATS_SERVER";
     match env::var(key) {
         Ok(val) => {
-            natsUrl = val;
+            natsUrl = val.to_owned();
         },
-        Err(_) => natsUrl = "http://localhost:4222",
+        Err(_) => natsUrl = "http://localhost:4222".to_string(),
     }
     key = "SECTOR_DIR";
     match env::var(key) {
         Ok(val) => {
-          sectorDir = val;
+          sectorDir = val.to_owned();
         },
-        Err(_) => sectorDir = "pod",
+        Err(_) => sectorDir = "pod".to_string(),
     }
     key = "MINER_IP";
     match env::var(key) {
         Ok(val) => {
-            minerIP = val;
+            minerIP = val.to_owned();
         },
         Err(_) => {
             if debug {
-                minerIP = "127.0.0.1";
+                minerIP = "127.0.0.1".to_string();
             }
         },
     }
     key = "PROOF_TYPE";
     match env::var(key) {
         Ok(val) => {
-            if(val == 3){
+            if(val == "3"){
                proofType= RegisteredSealProof_StackedDrg32GiBV1;
             }
-            else if (val == 8) {
+            else if (val == "8") {
                proofType= RegisteredSealProof_StackedDrg32GiBV1_1;
             }
         },
@@ -98,32 +98,32 @@ pub fn env_init(){
     key = "SECTOR_MINER_ID";
     match env::var(key) {
         Ok(val) => {
-            minerIDStr = val.clone();
-            sectorMinerID = from_str::<u64>(val);
+            minerIDStr = val.to_owned();
+            sectorMinerID = val.parse::<u64>().unwrap();;
         },
-        Err(e) => sectorMinerID = from_str::<u64>("0"),
+        Err(e) => sectorMinerID = "0".parse::<u64>().unwrap(),
     }
     key = "SECTOR_NUMBER";
     match env::var(key) {
         Ok(val) => {
-            sectorNumber = from_str::<u64>(val);
+            sectorNumber = val.parse::<u64>().unwrap();;
         },
-        Err(e) => sectorNumber = from_str::<u64>("0"),
+        Err(e) => sectorNumber = "0".parse::<u64>().unwrap(),
     }
     key = "TASK_SECTOR_TYPE";
     match env::var(key) {
         Ok(val) => {
-            taskSectorType = val;
+            taskSectorType = val.to_owned();
         },
-        Err(e) => taskSectorType = "",
+        Err(e) => taskSectorType = String::from(""),
     }
-    if &taskSectorType == SECTOR_TYPE_2k {
+    if taskSectorType == SECTOR_TYPE_2k {
 
     };
     key = "TASK_TYPE";
     match env::var(key) {
         Ok(val) => {
-            taskTyp = val;
+            taskTyp = val.to_owned();
         },
         Err(e) => println!("task not defined : {}", e),
     }
@@ -132,14 +132,14 @@ pub fn env_init(){
         Ok(val) => {
            match env::var(val){
                Ok(addrs) => {
-                   podIp = addrs[0];
-                   Println!("current pod IP is : ", &podIp)
+                   // podIp = addrs;
+                   // println!("current pod IP is : ", podIp)
                },
                Err(e) => panic!(e),
            }
         },
         Err(_) => {
-            if &taskTyp == READ_PIECE || &taskTyp == WINDOW_POST || &taskTyp == WINNING_POST {
+            if taskTyp == READ_PIECE || taskTyp == WINDOW_POST || taskTyp == WINNING_POST {
             } else {
                 panic!("fail to seek JOB_POD_NAME : {}");
             }
@@ -148,7 +148,7 @@ pub fn env_init(){
     key = "RESERVE_GIB_FOR_COPY_SECTOR";
     match env::var(key) {
         Ok(val) => {
-            copyFullGiB = from_str::<u64>(val)
+            copyFullGiB = val.parse::<u64>().unwrap();
         },
         _ => {}
     }
@@ -156,9 +156,10 @@ pub fn env_init(){
     match env::var(key) {
         Ok(val) => {
             println!("params =>{}",val);
-            if &taskTyp == WINDOW_POST {
+            if taskTyp == WINDOW_POST {
             } else {
-                //encode
+
+              params = ("test").as_ref();
             }
         },
         _ => {}
@@ -166,17 +167,17 @@ pub fn env_init(){
     key = "RESERVE_GIB_FOR_SYSTEM_AND_LAST_UNSEALED_SECTOR";
     match env::var(key) {
         Ok(val) => {
-            reserveGiBForSystemAndUnsealedSector = from_str::<u64>(val)
+            reserveGiBForSystemAndUnsealedSector = val.parse::<u64>().unwrap();
         },
         Err(_) => reserveGiBForSystemAndUnsealedSector = 500,
     }
     key = "JOB_NODE_NAME";
     match env::var(key) {
         Ok(val) => {
-            jobNodeName = val;
+           jobNodeName = val.to_owned();
         },
         Err(_) =>{
-            if &taskTyp == READ_PIECE {
+            if taskTyp == READ_PIECE {
                println!("JOB_NODE_NAME env have not set")
             }
         }
