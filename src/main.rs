@@ -22,7 +22,10 @@ use base64::{encode, decode};
   static mut copyFullGiB : u64 =0;
   static mut sectorMinerID : u64 =0;
   static mut sectorNumber : u64 =0;
-  static mut params : &[u8] = "none".as_bytes();
+// lazy_static! {
+//     static ref PARAMS: Mutex<Vec<u8>> = Mutex::new(Vec![]);
+// }
+  static mut params :Vec<u8> = vec![];
 
 pub const RegisteredSealProof_StackedDrg2KiBV1:u64 = 0;
 pub const RegisteredSealProof_StackedDrg32GiBV1:u64 = 3;
@@ -101,14 +104,14 @@ pub unsafe fn env_init(){
     match env::var(key) {
         Ok(val) => {
             minerIDStr = val.to_owned();
-            sectorMinerID = val.parse::<u64>().unwrap();;
+            sectorMinerID = val.parse::<u64>().unwrap();
         },
         Err(e) => sectorMinerID = "0".parse::<u64>().unwrap(),
     }
     key = "SECTOR_NUMBER";
     match env::var(key) {
         Ok(val) => {
-            sectorNumber = val.parse::<u64>().unwrap();;
+            sectorNumber = val.parse::<u64>().unwrap();
         },
         Err(e) => sectorNumber = "0".parse::<u64>().unwrap(),
     }
@@ -160,8 +163,7 @@ pub unsafe fn env_init(){
             println!("params =>{}",val);
             if taskTyp == WINDOW_POST {
             } else {
-
-              params = ("test").as_ref();
+                params = base64::decode(val.clone()).unwrap();
             }
         },
         _ => {}
