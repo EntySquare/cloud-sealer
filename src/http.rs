@@ -33,7 +33,7 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[test]
+// #[test]
 pub fn open_file() -> Result<String, Error> {
     // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
@@ -49,9 +49,7 @@ pub fn test_unsigned_varint() {
     // let mut buf2 :  [u8; 32];
     let mut buf = [0; 32];
     let mut buf2 = &mut [0; 32];
-    // let mut buf =encode::u64_buffer();
-    // encode::u64(n, &mut buf));
-    let miner_id: u64 = 23443345;
+    let miner_id: u64 = 1000;
     let mut prover_id = u642(miner_id, &mut buf);
 
     for i in 0..32 {
@@ -59,8 +57,6 @@ pub fn test_unsigned_varint() {
             buf2[i]=prover_id[i];
         }
     }
-
-
     println!("C2 — prover_id: {:?}", buf2);
 }
 

@@ -11,6 +11,8 @@ use paired::bls12_381::Fr;
 use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
 
+use crate::http::u642;
+
 mod http;
 
 static mut eventing: bool = false;
@@ -192,10 +194,24 @@ pub unsafe fn env_init() {
 
 fn main() {
     println!("Hello, world!");
-    let file_txt = http::open_file();
+    let file_txt = open_file();
     println!("{}", file_txt.unwrap());
+
+    let mut buf = [0; 32];
+    let mut buf2 = &mut [0; 32];
+    let miner_id: u64 = 1000;
+    let mut prover_id = u642(miner_id, &mut buf);
+
+    for i in 0..32 {
+        if i < prover_id.len() {
+            buf2[i] = prover_id[i];
+        }
+    }
+    let prover_id: ProverId = *buf2;
+    println!("{:?}", prover_id);
     let scp1o = serde_json::from_slice(&*file_txt.unwrap().into_bytes()).map_err(Into::into);
-    scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+    // scp1o.and_then(|o| seal_commit_phase2(o, prover_id.inner, SectorId::from(sector_id)));
+    scp1o.and_then(|o| seal_commit_phase2(o, prover_id, SectorId::from(0)));
 }
 
 pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(
@@ -230,4 +246,13 @@ pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(
     Ok(SealCommitPhase2Output {
         proof: output.proof,
     })
+}
+
+pub fn open_file() -> Result<String, Error> {
+    // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
+    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    // print!("{}", contents);
+    Ok(contents)
 }
