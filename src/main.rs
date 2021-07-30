@@ -193,6 +193,7 @@ pub unsafe fn env_init() {
 }
 
 fn main() {
+    unsafe { env_init(); }
     println!("run main ------------------");
 
     let mut file = std::fs::File::open("/Users/guodayang/code-work/file/c2.params").unwrap();
@@ -202,7 +203,7 @@ fn main() {
     // contents.as_bytes();
     let mut buf = [0; 32];
     let mut buf2 = &mut [0; 32];
-    let miner_id: u64 = 1000;
+    let miner_id: u64 = unsafe { sectorMinerID }.clone();
     let mut prover_id = u642(miner_id, &mut buf);
     for i in 0..32 {
         if i < prover_id.len() {
@@ -213,7 +214,7 @@ fn main() {
     println!("{:?}", prover_id);
     let scp1o:  SealCommitPhase1Output = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.params").unwrap()).unwrap();
     println!("{:?}",scp1o);
-    seal_commit_phase2(scp1o, prover_id, SectorId::from(0));
+    unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
 
     // println!("Hello, world!");
     // let file_txt = open_file();
