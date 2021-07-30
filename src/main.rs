@@ -6,7 +6,7 @@ use std::io::{Error, Read};
 use anyhow::Result;
 use base64::{decode, encode};
 use filecoin_proofs::{ProverId, SealCommitOutput};
-use filecoin_proofs_api::seal::{SealCommitPhase1Output, SealCommitPhase2Output, seal_commit_phase2};
+use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
 use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
@@ -193,16 +193,17 @@ pub unsafe fn env_init() {
 }
 
 fn main() {
-    unsafe { env_init(); }
+    // unsafe { env_init(); }
     println!("run main ------------------");
 
-    let mut file = std::fs::File::open("/Users/guodayang/code-work/file/c2.params").unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    println!("{}",contents);
+    // let mut file = std::fs::File::open("./params/c2.params").unwrap();
+    // let mut contents = String::new();
+    // file.read_to_string(&mut contents).unwrap();
+    // println!("{}",contents);
     // contents.as_bytes();
     let mut buf = [0; 32];
     let mut buf2 = &mut [0; 32];
+    // let miner_id: u64 = unsafe { sectorMinerID }.clone();
     let miner_id: u64 = unsafe { sectorMinerID }.clone();
     let mut prover_id = u642(miner_id, &mut buf);
     for i in 0..32 {
@@ -212,7 +213,7 @@ fn main() {
     }
     let prover_id: ProverId = *buf2;
     println!("{:?}", prover_id);
-    let scp1o:  SealCommitPhase1Output = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.params").unwrap()).unwrap();
+    let scp1o:  SealCommitPhase1Output = serde_json::from_slice(&std::fs::read("./params/c2.params").unwrap()).unwrap();
     println!("{:?}",scp1o);
     unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
 
@@ -237,58 +238,55 @@ fn main() {
     // scp1o.and_then(|o| seal_commit_phase2(o, prover_id, SectorId::from(0)));
 }
 
-// pub fn seal_commit_phase2(
-//     phase1_output: SealCommitPhase1Output,
-//     prover_id: ProverId,
-//     sector_id: SectorId,
-// ) -> Result<SealCommitPhase2Output> {
-//     ensure!(
-//         phase1_output.registered_proof.major_version() == 1,
-//         "unusupported version"
-//     );
-//     with_shape!(
-//         u64::from(phase1_output.registered_proof.sector_size()),
-//         seal_commit_phase2_inner,
-//         phase1_output,
-//         prover_id,
-//         sector_id,
-//     )
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// pub struct SealCommitPhase1Output {
+//     pub registered_proof: RegisteredSealProof,
+//     pub vanilla_proofs: VanillaSealProof,
+//     pub comm_r: Commitment,
+//     pub comm_d: Commitment,
+//     pub replica_id: <filecoin_proofs_v1::constants::DefaultTreeHasher as Hasher>::Domain,
+//     pub seed: Ticket,
+//     pub ticket: Ticket,
 // }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SealCommitPhase2Output {
+    pub proof: Vec<u8>,
+}
 
-// pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(
-//     phase1_output: SealCommitPhase1Output,
-//     prover_id: ProverId,
-//     sector_id: SectorId,
-// ) -> Result<SealCommitPhase2Output> {
-//     let SealCommitPhase1Output {
-//         vanilla_proofs,
-//         comm_r,
-//         comm_d,
-//         replica_id,
-//         seed,
-//         ticket,
-//         registered_proof,
-//     } = phase1_output;
-//
-//     let config = registered_proof.as_v1_config();
-//     let replica_id: Fr = replica_id.into();
-//
-//     let co = filecoin_proofs::types::SealCommitPhase1Output {
-//         vanilla_proofs: vanilla_proofs.try_into()?,
-//         comm_r,
-//         comm_d,
-//         replica_id: replica_id.into(),
-//         seed,
-//         ticket,
-//     };
-//
-//     let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sector_id)?;
-//
-//     Ok(SealCommitPhase2Output {
-//         proof: output.proof,
-//     })
-// }
+pub fn seal_commit_phase2<Tree: 'static + MerkleTreeTrait>(
+    phase1_output: SealCommitPhase1Output,
+    prover_id: ProverId,
+    sector_id: SectorId,
+) -> Result<SealCommitPhase2Output> {
+    let SealCommitPhase1Output {
+        vanilla_proofs,
+        comm_r,
+        comm_d,
+        replica_id,
+        seed,
+        ticket,
+        registered_proof,
+    } = phase1_output;
+
+    let config = registered_proof.as_v1_config();
+    let replica_id: Fr = replica_id.into();
+
+    let co = filecoin_proofs::types::SealCommitPhase1Output {
+        vanilla_proofs: vanilla_proofs.try_into()?,
+        comm_r,
+        comm_d,
+        replica_id: replica_id.into(),
+        seed,
+        ticket,
+    };
+
+    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sector_id)?;
+
+    Ok(SealCommitPhase2Output {
+        proof: output.proof,
+    })
+}
 
 pub fn open_file() -> Result<String, Error> {
     // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
