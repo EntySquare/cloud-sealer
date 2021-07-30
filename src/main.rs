@@ -5,8 +5,9 @@ use std::io::{Error, Read};
 
 use anyhow::Result;
 use base64::{decode, encode};
-use filecoin_proofs::{ProverId, SealCommitOutput};
-use filecoin_proofs_api::seal::{SealCommitPhase1Output};
+use filecoin_hashers::Hasher;
+use filecoin_proofs::{ProverId, SealCommitOutput, SectorShape2KiB, SectorShape32GiB, SectorShape512MiB, SectorShape64GiB, SectorShape8MiB};
+// use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
 use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
@@ -213,8 +214,8 @@ fn main() {
     }
     let prover_id: ProverId = *buf2;
     println!("{:?}", prover_id);
-    let scp1o:  SealCommitPhase1Output = serde_json::from_slice(&std::fs::read("./params/c2.params").unwrap()).unwrap();
-    println!("{:?}",scp1o);
+    let scp1o: SealCommitPhase1Output = serde_json::from_slice(&std::fs::read("./params/c2.params").unwrap()).unwrap();
+    println!("{:?}", scp1o);
     unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
 
     // println!("Hello, world!");
@@ -238,16 +239,43 @@ fn main() {
     // scp1o.and_then(|o| seal_commit_phase2(o, prover_id, SectorId::from(0)));
 }
 
-// #[derive(Clone, Debug, Serialize, Deserialize)]
-// pub struct SealCommitPhase1Output {
-//     pub registered_proof: RegisteredSealProof,
-//     pub vanilla_proofs: VanillaSealProof,
-//     pub comm_r: Commitment,
-//     pub comm_d: Commitment,
-//     pub replica_id: <filecoin_proofs_v1::constants::DefaultTreeHasher as Hasher>::Domain,
-//     pub seed: Ticket,
-//     pub ticket: Ticket,
-// }
+pub type Commitment = [u8; 32];
+pub type Ticket = [u8; 32];
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum RegisteredSealProof {
+    StackedDrg2KiBV1,
+    StackedDrg8MiBV1,
+    StackedDrg512MiBV1,
+    StackedDrg32GiBV1,
+    StackedDrg64GiBV1,
+
+    StackedDrg2KiBV1_1,
+    StackedDrg8MiBV1_1,
+    StackedDrg512MiBV1_1,
+    StackedDrg32GiBV1_1,
+    StackedDrg64GiBV1_1,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum VanillaSealProof {
+    StackedDrg2KiBV1(Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>),
+    StackedDrg8MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>),
+    StackedDrg512MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>),
+    StackedDrg32GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>),
+    StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SealCommitPhase1Output {
+    pub registered_proof: RegisteredSealProof,
+    pub vanilla_proofs: VanillaSealProof,
+    pub comm_r: Commitment,
+    pub comm_d: Commitment,
+    pub replica_id: <filecoin_proofs::constants::DefaultTreeHasher as Hasher>::Domain,
+    pub seed: Ticket,
+    pub ticket: Ticket,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SealCommitPhase2Output {
