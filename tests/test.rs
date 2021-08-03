@@ -29,16 +29,16 @@ pub fn test_unsigned_varint() {
     println!("C2 — prover_id: {:?}", pid);
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SealCommitPhase1Output {
-    pub registered_proof: RegisteredSealProof,
-    pub vanilla_proofs: VanillaSealProof,
-    pub comm_r: Commitment,
-    pub comm_d: Commitment,
-    pub replica_id: <filecoin_proofs_v1::constants::DefaultTreeHasher as Hasher>::Domain,
-    pub seed: Ticket,
-    pub ticket: Ticket,
-}
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// pub struct SealCommitPhase1Output {
+//     pub registered_proof: RegisteredSealProof,
+//     pub vanilla_proofs: VanillaSealProof,
+//     pub comm_r: Commitment,
+//     pub comm_d: Commitment,
+//     pub replica_id: <filecoin_proofs_v1::constants::DefaultTreeHasher as Hasher>::Domain,
+//     pub seed: Ticket,
+//     pub ticket: Ticket,
+// }
 
 /// Available seal proofs.
 /// Enum is append-only: once published, a `RegisteredSealProof` value must never change.
@@ -57,41 +57,42 @@ pub enum RegisteredSealProof {
     StackedDrg64GiBV1_1,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum VanillaSealProof {
-    StackedDrg2KiBV1(Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>),
-    StackedDrg8MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>),
-    StackedDrg512MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>),
-    StackedDrg32GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>),
-    StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
-}
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// pub enum VanillaSealProof {
+//     StackedDrg2KiBV1(Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>),
+//     StackedDrg8MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>),
+//     StackedDrg512MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>),
+//     StackedDrg32GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>),
+//     StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
+// }
 
 #[test]
 pub fn calculate_c2() {
-    let scp1o = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.params").unwrap()).unwrap();
-    let SealCommitPhase1Output {
-        vanilla_proofs,
-        comm_r,
-        comm_d,
-        replica_id,
-        seed,
-        ticket,
-        registered_proof,
-    } = scp1o;
+    let scp1o: http::SealCommitPhase1Output  = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.params").unwrap()).unwrap();
+    println!("{}",scp1o);
+    // let SealCommitPhase1Output {
+    //     vanilla_proofs,
+    //     comm_r,
+    //     comm_d,
+    //     replica_id,
+    //     seed,
+    //     ticket,
+    //     registered_proof,
+    // } = scp1o;
 
-    let config = registered_proof.as_v1_config();
-    let replica_id: Fr = replica_id.into();
-
-    let co = filecoin_proofs_v1::types::SealCommitPhase1Output {
-        vanilla_proofs: vanilla_proofs.try_into()?,
-        comm_r,
-        comm_d,
-        replica_id: replica_id.into(),
-        seed,
-        ticket,
-    };
-    println!("{:?}", scp1o);
-    unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
+    // let config = registered_proof.as_v1_config();
+    // let replica_id: Fr = replica_id.into();
+    //
+    // let co = filecoin_proofs_v1::types::SealCommitPhase1Output {
+    //     vanilla_proofs: vanilla_proofs.try_into()?,
+    //     comm_r,
+    //     comm_d,
+    //     replica_id: replica_id.into(),
+    //     seed,
+    //     ticket,
+    // };
+    // println!("{:?}", scp1o);
+    // unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
 }
 
 #[inline]
