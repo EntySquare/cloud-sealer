@@ -370,7 +370,8 @@ struct Commit2In {
     phase_1_out: String,
 }
 
-unsafe fn main() {
+ fn main() {
+     unsafe{
     println!("run main ------------------");
     let res = File::open("./params/c2.params").unwrap();
     let commit2: Commit2In = serde_json::from_reader(res).unwrap();
@@ -392,7 +393,7 @@ unsafe fn main() {
         prover_id,
         SECTOR_NUMBER.clone(),
     )
-
+     }
     // println!("{:?}", scp1o);
 }
 
