@@ -68,7 +68,7 @@ pub enum RegisteredSealProof {
 
 #[test]
 pub fn calculate_c2() {
-    let scp1o: http::SealCommitPhase1Output  = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.params").unwrap()).unwrap();
+    let scp1o: http::SealCommitPhase1Output  = serde_json::from_slice(&std::fs::read("/Users/guodayang/code-work/file/c2.PARAMS").unwrap()).unwrap();
     println!("{}",scp1o);
     // let SealCommitPhase1Output {
     //     vanilla_proofs,
@@ -92,7 +92,7 @@ pub fn calculate_c2() {
     //     ticket,
     // };
     // println!("{:?}", scp1o);
-    // unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(sectorNumber.clone())); }
+    // unsafe { seal_commit_phase2(scp1o, prover_id, SectorId::from(SECTOR_NUMBER.clone())); }
 }
 
 #[inline]

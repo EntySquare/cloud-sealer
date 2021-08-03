@@ -1,9 +1,9 @@
 use std::convert::TryInto;
 use std::env;
-use std::env::VarError;
+
 use std::io::{ Read};
 
-use base64::{decode, encode};
+// use base64::{decode, encode};
 use filecoin_hashers::Hasher;
 use filecoin_proofs::{ProverId, SealCommitOutput, SectorSize, constants};
 // use filecoin_proofs_api::seal::{SealCommitPhase1Output};
@@ -13,7 +13,7 @@ use storage_proofs_core::sector::SectorId;
 
 // use filecoin_proofs_api::seal;
 
-// debug todo
+// DEBUG todo
 use serde::{Deserialize, Serialize};
 use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
 use storage_proofs_core::merkle::MerkleTreeTrait;
@@ -32,30 +32,30 @@ use storage_proofs_core::api_version::ApiVersion;
 
 mod http;
 
-static mut eventing: bool = false;
-static mut debug: bool = false;
-static mut persisting: bool = false;
-static mut tmpPath: String = String::new();
-static mut natsUrl: String = String::new();
-static mut sectorDir: String = String::new();
-static mut minerIP: String = String::new();
-static mut minerIDStr: String = String::new();
-static mut jobNodeName: String = String::new();
-static mut taskSectorType: String = String::new();
-static mut taskTyp: String = String::new();
-static mut podIp: String = String::new();
-static mut proofType: u64 = 0;
-static mut reserveGiBForSystemAndUnsealedSector: u64 = 500;
-static mut copyFullGiB: u64 = 0;
-static mut sectorMinerID: u64 = 0;
-static mut sectorNumber: u64 = 0;
+static mut EVENTING: bool = false;
+static mut DEBUG: bool = false;
+static mut PERSISTING: bool = false;
+static mut TMP_PATH: String = String::new();
+static mut NATS_URL: String = String::new();
+static mut SECTOR_DIR: String = String::new();
+static mut MINER_IP: String = String::new();
+static mut MINER_IDSTR: String = String::new();
+static mut JOB_NODE_NAME: String = String::new();
+static mut TASK_SECTOR_TYPE: String = String::new();
+static mut TASK_TYP: String = String::new();
+static mut POD_IP: String = String::new();
+static mut PROOF_TYPE: u64 = 0;
+static mut RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR: u64 = 500;
+static mut COPY_FULL_GI_B: u64 = 0;
+static mut SECTOR_MINER_ID: u64 = 0;
+static mut SECTOR_NUMBER: u64 = 0;
 
-static mut params: Vec<u8> = vec![];
+static mut PARAMS: Vec<u8> = vec![];
 
-pub const RegisteredSealProof_StackedDrg2KiBV1: u64 = 0;
-pub const RegisteredSealProof_StackedDrg32GiBV1: u64 = 3;
-pub const RegisteredSealProof_StackedDrg32GiBV1_1: u64 = 8;
-pub const SECTOR_TYPE_2k: &str = "2KiB";
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG2KI_BV1: u64 = 0;
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1: u64 = 3;
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1: u64 = 8;
+pub const SECTOR_TYPE_2K: &str = "2KiB";
 pub const READ_PIECE: &str = "read-piece";
 pub const WINNING_POST: &str = "winning-post";
 pub const WINDOW_POST: &str = "window-post";
@@ -64,53 +64,53 @@ pub unsafe fn env_init() {
     let mut key = "EVENTING";
     match env::var(key) {
         Ok(_) => unsafe {
-            eventing = false;
+            EVENTING = false;
         },
-        Err(_) => eventing = true
+        Err(_) => EVENTING = true
     }
     key = "FILTAB_DEBUG";
     match env::var(key) {
         Ok(_) => {
-            debug = false;
+            DEBUG = false;
         }
-        Err(_) => debug = true
+        Err(_) => DEBUG = true
     }
     key = "PERSISTING";
     match env::var(key) {
         Ok(_) => {
-            persisting = false;
+            PERSISTING = false;
         }
-        Err(_) => persisting = true
+        Err(_) => PERSISTING = true
     }
     key = "TMP_PATH";
     match env::var(key) {
         Ok(val) => {
-            tmpPath = val.to_owned();
+            TMP_PATH = val.to_owned();
         }
-        Err(_) => tmpPath = "./tmp".to_string(),
+        Err(_) => TMP_PATH = "./tmp".to_string(),
     }
     key = "NATS_SERVER";
     match env::var(key) {
         Ok(val) => {
-            natsUrl = val.to_owned();
+            NATS_URL = val.to_owned();
         }
-        Err(_) => natsUrl = "http://localhost:4222".to_string(),
+        Err(_) => NATS_URL = "http://localhost:4222".to_string(),
     }
     key = "SECTOR_DIR";
     match env::var(key) {
         Ok(val) => {
-            sectorDir = val.to_owned();
+            SECTOR_DIR = val.to_owned();
         }
-        Err(_) => sectorDir = "pod".to_string(),
+        Err(_) => SECTOR_DIR = "pod".to_string(),
     }
     key = "MINER_IP";
     match env::var(key) {
         Ok(val) => {
-            minerIP = val.to_owned();
+            MINER_IP = val.to_owned();
         }
         Err(_) => {
-            if debug {
-                minerIP = "127.0.0.1".to_string();
+            if DEBUG {
+                MINER_IP = "127.0.0.1".to_string();
             }
         }
     }
@@ -118,40 +118,40 @@ pub unsafe fn env_init() {
     match env::var(key) {
         Ok(val) => {
             if (val == "3") {
-                proofType = RegisteredSealProof_StackedDrg32GiBV1;
+                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1;
             } else if (val == "8") {
-                proofType = RegisteredSealProof_StackedDrg32GiBV1_1;
+                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1;
             }
         }
-        Err(e) => proofType = RegisteredSealProof_StackedDrg32GiBV1,
+        Err(e) => PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1,
     }
     key = "SECTOR_MINER_ID";
     match env::var(key) {
         Ok(val) => {
-            minerIDStr = val.to_owned();
-            sectorMinerID = val.parse::<u64>().unwrap();
+            MINER_IDSTR = val.to_owned();
+            SECTOR_MINER_ID = val.parse::<u64>().unwrap();
         }
-        Err(e) => sectorMinerID = "0".parse::<u64>().unwrap(),
+        Err(e) => SECTOR_MINER_ID = "0".parse::<u64>().unwrap(),
     }
     key = "SECTOR_NUMBER";
     match env::var(key) {
         Ok(val) => {
-            sectorNumber = val.parse::<u64>().unwrap();
+            SECTOR_NUMBER = val.parse::<u64>().unwrap();
         }
-        Err(e) => sectorNumber = "0".parse::<u64>().unwrap(),
+        Err(e) => SECTOR_NUMBER = "0".parse::<u64>().unwrap(),
     }
     key = "TASK_SECTOR_TYPE";
     match env::var(key) {
         Ok(val) => {
-            taskSectorType = val.to_owned();
+            TASK_SECTOR_TYPE = val.to_owned();
         }
-        Err(e) => taskSectorType = String::from(""),
+        Err(e) => TASK_SECTOR_TYPE = String::from(""),
     }
-    if taskSectorType == SECTOR_TYPE_2k {};
+    if TASK_SECTOR_TYPE == SECTOR_TYPE_2K {};
     key = "TASK_TYPE";
     match env::var(key) {
         Ok(val) => {
-            taskTyp = val.to_owned();
+            TASK_TYP = val.to_owned();
         }
         Err(e) => println!("task not defined : {}", e),
     }
@@ -160,31 +160,31 @@ pub unsafe fn env_init() {
         Ok(val) => {
             match env::var(val) {
                 Ok(addrs) => {
-                    // podIp = addrs;
-                    // println!("current pod IP is : ", podIp)
+                    // POD_IP = addrs;
+                    // println!("current pod IP is : ", POD_IP)
                 }
-                Err(e) => panic!(e),
+                Err(e) => panic!("{}",e),
             }
         }
         Err(_) => {
-            if taskTyp == READ_PIECE || taskTyp == WINDOW_POST || taskTyp == WINNING_POST {} else {
-                panic!("fail to seek JOB_POD_NAME : {}");
+            if TASK_TYP == READ_PIECE || TASK_TYP == WINDOW_POST || TASK_TYP == WINNING_POST {} else {
+                panic!("fail to seek JOB_POD_NAME ");
             }
         }
     }
     key = "RESERVE_GIB_FOR_COPY_SECTOR";
     match env::var(key) {
         Ok(val) => {
-            copyFullGiB = val.parse::<u64>().unwrap();
+            COPY_FULL_GI_B = val.parse::<u64>().unwrap();
         }
         _ => {}
     }
     key = "PARAMS";
     match env::var(key) {
         Ok(val) => {
-            println!("params =>{}", val);
-            if taskTyp == WINDOW_POST {} else {
-                params = base64::decode(val.clone()).unwrap();
+            println!("PARAMS =>{}", val);
+            if TASK_TYP == WINDOW_POST {} else {
+                PARAMS = base64::decode(val.clone()).unwrap();
             }
         }
         _ => {}
@@ -192,17 +192,17 @@ pub unsafe fn env_init() {
     key = "RESERVE_GIB_FOR_SYSTEM_AND_LAST_UNSEALED_SECTOR";
     match env::var(key) {
         Ok(val) => {
-            reserveGiBForSystemAndUnsealedSector = val.parse::<u64>().unwrap();
+            RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = val.parse::<u64>().unwrap();
         }
-        Err(_) => reserveGiBForSystemAndUnsealedSector = 500,
+        Err(_) => RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = 500,
     }
     key = "JOB_NODE_NAME";
     match env::var(key) {
         Ok(val) => {
-            jobNodeName = val.to_owned();
+            JOB_NODE_NAME = val.to_owned();
         }
         Err(_) => {
-            if taskTyp == READ_PIECE {
+            if TASK_TYP == READ_PIECE {
                 println!("JOB_NODE_NAME env have not set")
             }
         }
@@ -301,63 +301,63 @@ impl RegisteredSealProof {
 }
 
 
-impl VanillaSealProof {
-    #[allow(clippy::ptr_arg)]
-    fn from_raw<Tree: 'static + MerkleTreeTrait>(
-        proof: RegisteredSealProof,
-        proofs: &Vec<Vec<RawVanillaSealProof<Tree>>>,
-    ) -> Result<Self> {
-        use std::any::Any;
-        use RegisteredSealProof::*;
-        match proof {
-            StackedDrg2KiBV1 | StackedDrg2KiBV1_1 => {
-                if let Some(proofs) =
-                Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>>(proofs)
-                {
-                    Ok(VanillaSealProof::StackedDrg2KiBV1(proofs.clone()))
-                } else {
-                    bail!("invalid proofs provided")
-                }
-            }
-            StackedDrg8MiBV1 | StackedDrg8MiBV1_1 => {
-                if let Some(proofs) =
-                Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>>(proofs)
-                {
-                    Ok(VanillaSealProof::StackedDrg8MiBV1(proofs.clone()))
-                } else {
-                    bail!("invalid proofs provided")
-                }
-            }
-            StackedDrg512MiBV1 | StackedDrg512MiBV1_1 => {
-                if let Some(proofs) =
-                Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>>(proofs)
-                {
-                    Ok(VanillaSealProof::StackedDrg512MiBV1(proofs.clone()))
-                } else {
-                    bail!("invalid proofs provided")
-                }
-            }
-            StackedDrg32GiBV1 | StackedDrg32GiBV1_1 => {
-                if let Some(proofs) =
-                Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>>(proofs)
-                {
-                    Ok(VanillaSealProof::StackedDrg32GiBV1(proofs.clone()))
-                } else {
-                    bail!("invalid proofs provided")
-                }
-            }
-            StackedDrg64GiBV1 | StackedDrg64GiBV1_1 => {
-                if let Some(proofs) =
-                Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>>(proofs)
-                {
-                    Ok(VanillaSealProof::StackedDrg64GiBV1(proofs.clone()))
-                } else {
-                    bail!("invalid proofs provided")
-                }
-            }
-        }
-    }
-}
+// impl VanillaSealProof {
+//     #[allow(clippy::ptr_arg)]
+//     fn from_raw<Tree: 'static + MerkleTreeTrait>(
+//         proof: RegisteredSealProof,
+//         proofs: &Vec<Vec<RawVanillaSealProof<Tree>>>,
+//     ) -> Result<Self> {
+//         use std::any::Any;
+//         use RegisteredSealProof::*;
+//         match proof {
+//             StackedDrg2KiBV1 | StackedDrg2KiBV1_1 => {
+//                 if let Some(proofs) =
+//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>>(proofs)
+//                 {
+//                     Ok(VanillaSealProof::StackedDrg2KiBV1(proofs.clone()))
+//                 } else {
+//                     bail!("invalid proofs provided")
+//                 }
+//             }
+//             StackedDrg8MiBV1 | StackedDrg8MiBV1_1 => {
+//                 if let Some(proofs) =
+//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>>(proofs)
+//                 {
+//                     Ok(VanillaSealProof::StackedDrg8MiBV1(proofs.clone()))
+//                 } else {
+//                     bail!("invalid proofs provided")
+//                 }
+//             }
+//             StackedDrg512MiBV1 | StackedDrg512MiBV1_1 => {
+//                 if let Some(proofs) =
+//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>>(proofs)
+//                 {
+//                     Ok(VanillaSealProof::StackedDrg512MiBV1(proofs.clone()))
+//                 } else {
+//                     bail!("invalid proofs provided")
+//                 }
+//             }
+//             StackedDrg32GiBV1 | StackedDrg32GiBV1_1 => {
+//                 if let Some(proofs) =
+//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>>(proofs)
+//                 {
+//                     Ok(VanillaSealProof::StackedDrg32GiBV1(proofs.clone()))
+//                 } else {
+//                     bail!("invalid proofs provided")
+//                 }
+//             }
+//             StackedDrg64GiBV1 | StackedDrg64GiBV1_1 => {
+//                 if let Some(proofs) =
+//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>>(proofs)
+//                 {
+//                     Ok(VanillaSealProof::StackedDrg64GiBV1(proofs.clone()))
+//                 } else {
+//                     bail!("invalid proofs provided")
+//                 }
+//             }
+//         }
+//     }
+// }
 
 impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>>>
 for VanillaSealProof
@@ -421,7 +421,7 @@ fn main() {
 
     // unsafe { env_init(); }
     println!("run main ------------------");
-    let res = &std::fs::read("/Users/terrill/sandbox/cloud-sealer/params/c2.params").unwrap();
+    let res = &std::fs::read("/Users/terrill/sandbox/cloud-sealer/PARAMS/c2.PARAMS").unwrap();
     let mut scp1o: Result<SealCommitPhase1Output, Error> = serde_json::from_slice(res).map_err(Into::into);
     let mut scp1o2 = scp1o.unwrap().clone();
 
@@ -474,7 +474,7 @@ fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPh
 }
 
 pub fn open_file() -> Result<String, Error> {
-    // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
+    // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.PARAMS").unwrap();
     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();

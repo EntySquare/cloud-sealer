@@ -7,7 +7,7 @@ cloud native filecoin sealer built from rust
 
 cloud sealer native seal_commit_phase2
 
-    // invoke such params
+    // invoke such PARAMS
     porep_config: PoRepConfig,
     phase1_output: SealCommitPhase1Output<Tree>,
     prover_id: ProverId,
