@@ -11,7 +11,7 @@ lazy_static = "1.2"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1.0.46"
-filecoin-proofs = { path = "../filecoin-proof-DEBUG", version = "8.0.2", default-features = false }
+filecoin-proofs = { path = "../filecoin-proof-debug", version = "8.0.2", default-features = false }
 #filecoin-proofs-api = { version = "8.0.1" }
 storage-proofs-core = { version = "8.0.3" }
 #filecoin-proofs = { version = "8.0.2" }
@@ -23,4 +23,3 @@ filecoin-hashers = "3.0.3"
 serde = { version = "1.0", features = ["rc", "derive"] }
 base64-url = "1.4.10"
 bellperson = { path = "../entysnark"}
-storage-proofs-porep = { path = "../enty-porep" }
