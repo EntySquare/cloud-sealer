@@ -27,7 +27,7 @@ use filecoin_proofs::constants::{
 use filecoin_proofs::{with_shape, Labels as RawLabels};
 use anyhow::{bail, ensure, Error, Result};
 
-use crate::http::u642;
+// use crate::http::u642;
 use storage_proofs_core::api_version::ApiVersion;
 use std::fs::File;
 
