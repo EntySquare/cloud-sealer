@@ -1,35 +1,31 @@
 use std::convert::TryInto;
 use std::env;
+use std::fs::File;
+use std::io::Read;
 
-use std::io::{Read};
-
+use anyhow::{bail, ensure, Error, Result};
 // use base64::{decode, encode};
 use filecoin_hashers::Hasher;
-use filecoin_proofs::{ProverId, SealCommitOutput, SectorSize, constants};
+use filecoin_proofs::{constants, ProverId, SealCommitOutput, SectorSize};
+use filecoin_proofs::{Labels as RawLabels, with_shape};
+use filecoin_proofs::constants::{
+    SECTOR_SIZE_16_KIB, SECTOR_SIZE_16_MIB, SECTOR_SIZE_1_GIB, SECTOR_SIZE_2_KIB, SECTOR_SIZE_32_GIB,
+    SECTOR_SIZE_32_KIB, SECTOR_SIZE_4_KIB, SECTOR_SIZE_512_MIB, SECTOR_SIZE_64_GIB, SECTOR_SIZE_8_MIB,
+    SectorShape16KiB, SectorShape16MiB, SectorShape1GiB, SectorShape2KiB,
+    SectorShape32GiB, SectorShape32KiB, SectorShape4KiB, SectorShape512MiB,
+    SectorShape64GiB, SectorShape8MiB,
+};
+use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
 // use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
-
+// DEBUG todo
+use serde::{Deserialize, Serialize};
+// use crate::http::u642;
+use storage_proofs_core::api_version::ApiVersion;
+use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
 
 // use filecoin_proofs_api::seal;
-
-// DEBUG todo
-use serde::{Deserialize, Serialize};
-use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
-use storage_proofs_core::merkle::MerkleTreeTrait;
-use filecoin_proofs::constants::{
-    SectorShape16KiB, SectorShape16MiB, SectorShape1GiB, SectorShape2KiB, SectorShape32GiB,
-    SectorShape32KiB, SectorShape4KiB, SectorShape512MiB, SectorShape64GiB, SectorShape8MiB,
-    SECTOR_SIZE_16_KIB, SECTOR_SIZE_16_MIB, SECTOR_SIZE_1_GIB, SECTOR_SIZE_2_KIB,
-    SECTOR_SIZE_32_GIB, SECTOR_SIZE_32_KIB, SECTOR_SIZE_4_KIB, SECTOR_SIZE_512_MIB,
-    SECTOR_SIZE_64_GIB, SECTOR_SIZE_8_MIB,
-};
-use filecoin_proofs::{with_shape, Labels as RawLabels};
-use anyhow::{bail, ensure, Error, Result};
-
-// use crate::http::u642;
-use storage_proofs_core::api_version::ApiVersion;
-use std::fs::File;
 
 mod http;
 mod types;
@@ -370,30 +366,35 @@ struct Commit2In {
     phase_1_out: String,
 }
 
- fn main() {
-     unsafe{
-    println!("run main ------------------");
-    let res = File::open("./params/c2.params").unwrap();
-    let commit2: Commit2In = serde_json::from_reader(res).unwrap();
+fn main() {
+    unsafe {
+        println!("run main ------------------");
+        let res = File::open("./params/c2.params").unwrap();
+        let commit2: Commit2In = serde_json::from_reader(res).unwrap();
 
-    let mut scp1o: SealCommitPhase1Output = serde_json::from_slice(
-        base64_url::decode(commit2.phase_1_out.as_str()).unwrap().as_slice()
-    ).expect("serde_json err 001");
+        let mut scp1o: SealCommitPhase1Output = serde_json::from_slice(
+            base64_url::decode(commit2.phase_1_out.as_str()).unwrap().as_slice()
+        ).expect("serde_json err 001");
 
-    // println!("{:#?}",scp1o);
-    let mut miner_id = SECTOR_MINER_ID.clone();
-    let mut prover_id = types::miner_id_to_prover_id(miner_id);
+        // println!("{:#?}",scp1o);
+        let miner_id = match env::var("SECTOR_MINER_ID") {
+            Ok(val) => val.parse::<u64>().unwrap(),
+            Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
+        };
 
-    let mut scp1o2 = scp1o.clone();
-    // seal_commit_phase2_inner(scp1o.unwrap());
-    with_shape!(
+        // let mut miner_id = SECTOR_MINER_ID.clone();
+        let mut prover_id = types::miner_id_to_prover_id(miner_id);
+
+        let mut scp1o2 = scp1o.clone();
+        // seal_commit_phase2_inner(scp1o.unwrap());
+        with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
         scp1o2,
         prover_id,
         SECTOR_NUMBER.clone(),
     )
-     }
+    }
     // println!("{:?}", scp1o);
 }
 
