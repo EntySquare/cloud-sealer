@@ -350,6 +350,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64 0.12.3",
+ "filecoin-hashers",
  "filecoin-proofs",
  "filecoin-proofs-api",
  "lazy_static",
@@ -765,6 +766,7 @@ checksum = "aa9e1f14e1259a7aa09d8c389639343e61d6659715cd01f13b190c68e8397475"
 dependencies = [
  "anyhow",
  "bellperson",
+ "blake2s_simd",
  "fff",
  "generic-array 0.14.4",
  "hex",
