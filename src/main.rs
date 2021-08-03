@@ -1,7 +1,7 @@
 use std::convert::TryInto;
 use std::env;
 
-use std::io::{ Read};
+use std::io::{Read};
 
 // use base64::{decode, encode};
 use filecoin_hashers::Hasher;
@@ -32,6 +32,7 @@ use storage_proofs_core::api_version::ApiVersion;
 use std::fs::File;
 
 mod http;
+mod types;
 
 static mut EVENTING: bool = false;
 static mut DEBUG: bool = false;
@@ -164,7 +165,7 @@ pub unsafe fn env_init() {
                     // POD_IP = addrs;
                     // println!("current pod IP is : ", POD_IP)
                 }
-                Err(e) => panic!("{}",e),
+                Err(e) => panic!("{}", e),
             }
         }
         Err(_) => {
@@ -301,65 +302,6 @@ impl RegisteredSealProof {
     }
 }
 
-
-// impl VanillaSealProof {
-//     #[allow(clippy::ptr_arg)]
-//     fn from_raw<Tree: 'static + MerkleTreeTrait>(
-//         proof: RegisteredSealProof,
-//         proofs: &Vec<Vec<RawVanillaSealProof<Tree>>>,
-//     ) -> Result<Self> {
-//         use std::any::Any;
-//         use RegisteredSealProof::*;
-//         match proof {
-//             StackedDrg2KiBV1 | StackedDrg2KiBV1_1 => {
-//                 if let Some(proofs) =
-//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>>(proofs)
-//                 {
-//                     Ok(VanillaSealProof::StackedDrg2KiBV1(proofs.clone()))
-//                 } else {
-//                     bail!("invalid proofs provided")
-//                 }
-//             }
-//             StackedDrg8MiBV1 | StackedDrg8MiBV1_1 => {
-//                 if let Some(proofs) =
-//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>>(proofs)
-//                 {
-//                     Ok(VanillaSealProof::StackedDrg8MiBV1(proofs.clone()))
-//                 } else {
-//                     bail!("invalid proofs provided")
-//                 }
-//             }
-//             StackedDrg512MiBV1 | StackedDrg512MiBV1_1 => {
-//                 if let Some(proofs) =
-//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>>(proofs)
-//                 {
-//                     Ok(VanillaSealProof::StackedDrg512MiBV1(proofs.clone()))
-//                 } else {
-//                     bail!("invalid proofs provided")
-//                 }
-//             }
-//             StackedDrg32GiBV1 | StackedDrg32GiBV1_1 => {
-//                 if let Some(proofs) =
-//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>>(proofs)
-//                 {
-//                     Ok(VanillaSealProof::StackedDrg32GiBV1(proofs.clone()))
-//                 } else {
-//                     bail!("invalid proofs provided")
-//                 }
-//             }
-//             StackedDrg64GiBV1 | StackedDrg64GiBV1_1 => {
-//                 if let Some(proofs) =
-//                 Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>>(proofs)
-//                 {
-//                     Ok(VanillaSealProof::StackedDrg64GiBV1(proofs.clone()))
-//                 } else {
-//                     bail!("invalid proofs provided")
-//                 }
-//             }
-//         }
-//     }
-// }
-
 impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>>>
 for VanillaSealProof
 {
@@ -427,7 +369,8 @@ struct Commit2In {
     #[serde(rename = "Phase1Out")]
     phase_1_out: String,
 }
-fn main() {
+
+unsafe fn main() {
     println!("run main ------------------");
     let res = File::open("./params/c2.params").unwrap();
     let commit2: Commit2In = serde_json::from_reader(res).unwrap();
@@ -437,6 +380,8 @@ fn main() {
     ).expect("serde_json err 001");
 
     // println!("{:#?}",scp1o);
+    let mut miner_id = SECTOR_MINER_ID.clone();
+    let mut prover_id = types::miner_id_to_prover_id(miner_id);
 
     let mut scp1o2 = scp1o.clone();
     // seal_commit_phase2_inner(scp1o.unwrap());
@@ -444,13 +389,15 @@ fn main() {
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
         scp1o2,
+        prover_id,
+        SECTOR_NUMBER.clone(),
     )
 
     // println!("{:?}", scp1o);
 }
 
-fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPhase1Output) {
-    let prover_id = [0; 32];
+fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPhase1Output, prover_id: [u8; 32], sector_id: u64) {
+    let sid = SectorId::from(sector_id);
     let SealCommitPhase1Output {
         vanilla_proofs,
         comm_r,
@@ -478,8 +425,9 @@ fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPh
         ticket,
     };
 
-    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, SectorId::from(0)).unwrap();
+    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sid);
 
+    println!("{:#?}", output);
     //
     // Ok(SealCommitPhase2Output {
     //     proof: output.proof,
