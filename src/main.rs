@@ -29,6 +29,7 @@ use anyhow::{bail, ensure, Error, Result};
 
 use crate::http::u642;
 use storage_proofs_core::api_version::ApiVersion;
+use std::fs::File;
 
 mod http;
 
@@ -417,15 +418,27 @@ pub enum VanillaSealProof {
     StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct Commit2In {
+    #[serde(rename = "SectorSize")]
+    sector_size: i64,
+    #[serde(rename = "SectorNum")]
+    sector_num: i64,
+    #[serde(rename = "Phase1Out")]
+    phase_1_out: String,
+}
 fn main() {
-
-    // unsafe { env_init(); }
     println!("run main ------------------");
-    let res = &std::fs::read("/Users/terrill/sandbox/cloud-sealer/PARAMS/c2.PARAMS").unwrap();
-    let mut scp1o: Result<SealCommitPhase1Output, Error> = serde_json::from_slice(res).map_err(Into::into);
-    let mut scp1o2 = scp1o.unwrap().clone();
+    let res = File::open("./params/c2.params").unwrap();
+    let commit2: Commit2In = serde_json::from_reader(res).unwrap();
 
+    let mut scp1o: SealCommitPhase1Output = serde_json::from_slice(
+        base64_url::decode(commit2.phase_1_out.as_str()).unwrap().as_slice()
+    ).expect("serde_json err 001");
 
+    // println!("{:#?}",scp1o);
+
+    let mut scp1o2 = scp1o.clone();
     // seal_commit_phase2_inner(scp1o.unwrap());
     with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
