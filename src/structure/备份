@@ -1,0 +1,146 @@
+
+
+static mut EVENTING: bool = false;
+static mut DEBUG: bool = false;
+static mut PERSISTING: bool = false;
+static mut TMP_PATH: String = String::new();
+static mut NATS_URL: String = String::new();
+static mut SECTOR_DIR: String = String::new();
+static mut MINER_IP: String = String::new();
+static mut MINER_IDSTR: String = String::new();
+static mut JOB_NODE_NAME: String = String::new();
+static mut TASK_SECTOR_TYPE: String = String::new();
+static mut TASK_TYP: String = String::new();
+// static mut POD_IP: String = String::new();
+static mut PROOF_TYPE: u64 = 0;
+static mut RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR: u64 = 500;
+static mut COPY_FULL_GI_B: u64 = 0;
+static mut SECTOR_MINER_ID: u64 = 0;
+static mut SECTOR_NUMBER: u64 = 0;
+
+static mut PARAMS: Vec<u8> = vec![];
+
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG2KI_BV1: u64 = 0;
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1: u64 = 3;
+pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1: u64 = 8;
+pub const SECTOR_TYPE_2K: &str = "2KiB";
+pub const READ_PIECE: &str = "read-piece";
+pub const WINNING_POST: &str = "winning-post";
+pub const WINDOW_POST: &str = "window-post";
+
+pub unsafe fn env_init() {
+    EVENTING = env::var("EVENTING").is_ok();
+    DEBUG = env::var("FILTAB_DEBUG").is_ok();
+    PERSISTING = env::var("PERSISTING").is_ok();
+    match env::var("TMP_PATH") {
+        Ok(val) => {
+            TMP_PATH = val.to_owned();
+        }
+        Err(_) => TMP_PATH = "./tmp".to_string(),
+    }
+    match env::var("NATS_SERVER") {
+        Ok(val) => {
+            NATS_URL = val.to_owned();
+        }
+        Err(_) => NATS_URL = "http://localhost:4222".to_string(),
+    }
+    match env::var("SECTOR_DIR") {
+        Ok(val) => {
+            SECTOR_DIR = val.to_owned();
+        }
+        Err(_) => SECTOR_DIR = "pod".to_string(),
+    }
+    match env::var("MINER_IP") {
+        Ok(val) => {
+            MINER_IP = val.to_owned();
+        }
+        Err(_) => {
+            if DEBUG {
+                MINER_IP = "127.0.0.1".to_string();
+            }
+        }
+    }
+    match env::var("PROOF_TYPE") {
+        Ok(val) => {
+            if (val == "3") {
+                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1;
+            } else if (val == "8") {
+                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1;
+            }
+        }
+        Err(_) => PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1,
+    }
+    match env::var("SECTOR_MINER_ID") {
+        Ok(val) => {
+            MINER_IDSTR = val.to_owned();
+            SECTOR_MINER_ID = val.parse::<u64>().unwrap();
+        }
+        Err(_) => SECTOR_MINER_ID = "0".parse::<u64>().unwrap(),
+    }
+    match env::var("SECTOR_NUMBER") {
+        Ok(val) => {
+            SECTOR_NUMBER = val.parse::<u64>().unwrap();
+        }
+        Err(_) => SECTOR_NUMBER = "0".parse::<u64>().unwrap(),
+    }
+    match env::var("TASK_SECTOR_TYPE") {
+        Ok(val) => {
+            TASK_SECTOR_TYPE = val.to_owned();
+        }
+        Err(_) => TASK_SECTOR_TYPE = String::from(""),
+    }
+    if TASK_SECTOR_TYPE == SECTOR_TYPE_2K {};
+    match env::var("TASK_TYPE") {
+        Ok(val) => {
+            TASK_TYP = val.to_owned();
+        }
+        Err(e) => println!("task not defined : {}", e),
+    }
+    match env::var("JOB_POD_NAME") {
+        Ok(val) => {
+            match env::var(val) {
+                Ok(addrs) => {
+                    // POD_IP = addrs;
+                    // println!("current pod IP is : ", POD_IP)
+                }
+                Err(e) => panic!("{}", e),
+            }
+        }
+        Err(_) => {
+            if TASK_TYP == READ_PIECE || TASK_TYP == WINDOW_POST || TASK_TYP == WINNING_POST {} else {
+                panic!("fail to seek JOB_POD_NAME ");
+            }
+        }
+    }
+    match env::var("RESERVE_GIB_FOR_COPY_SECTOR") {
+        Ok(val) => {
+            COPY_FULL_GI_B = val.parse::<u64>().unwrap();
+        }
+        _ => {}
+    }
+    match env::var("PARAMS") {
+        Ok(val) => {
+            println!("PARAMS =>{}", val);
+            if TASK_TYP == WINDOW_POST {} else {
+                PARAMS = base64::decode(val.clone()).unwrap();
+            }
+        }
+        _ => {}
+    }
+    match env::var("RESERVE_GIB_FOR_SYSTEM_AND_LAST_UNSEALED_SECTOR") {
+        Ok(val) => {
+            RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = val.parse::<u64>().unwrap();
+        }
+        Err(_) => RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = 500,
+    }
+    match env::var("JOB_NODE_NAME") {
+        Ok(val) => {
+            JOB_NODE_NAME = val.to_owned();
+        }
+        Err(_) => {
+            if TASK_TYP == READ_PIECE {
+                println!("JOB_NODE_NAME env have not set")
+            }
+        }
+    }
+}

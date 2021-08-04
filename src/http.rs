@@ -1,21 +1,22 @@
-use std::collections::HashMap;
-use std::fmt::Error;
-use std::convert::AsMut;
-use std::fs::File;
-use std::io::Read;
+// use std::convert::AsMut;
+// use std::fs::File;
+// use std::io::Read;
 
-use resize_slice::ResizeSlice;
-use serde_json::to_string;
-use serde_json::value::Value;
-use unsigned_varint::encode;
+// use resize_slice::ResizeSlice;
+// use serde_json::to_string;
+// use serde_json::value::Value;
+// use unsigned_varint::encode;
 
-struct Commit1Resp {
-    c1out: Vec<u8>,
-}
+
 
 #[tokio::main]
 #[test]
 async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
+    use std::collections::HashMap;
+    struct Commit1Resp {
+        c1out: Vec<u8>,
+    }
+
     let client = reqwest::Client::new();
     let resp = client.post("http://0.0.0.0:7788/cloud")
         .body("the exact body that is sent")
@@ -33,8 +34,9 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-// #[test]
-pub fn open_file() -> Result<String, Error> {
+#[test]
+pub fn open_file() -> Result<String, dyn std::error::Error> {
+    use std::io::Read;
     // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
     let mut contents = String::new();
@@ -46,19 +48,19 @@ pub fn open_file() -> Result<String, Error> {
 
 
 
-fn clone_into_array<A, T>(slice: &[T]) -> A
-    where
-
-        A: Default + AsMut<[T]>,
-        T: Clone,
-
-{
-    let mut a = A::default();
-
-    <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
-
-    a
-}
+// fn clone_into_array<A, T>(slice: &[T]) -> A
+//     where
+//
+//         A: Default + AsMut<[T]>,
+//         T: Clone,
+//
+// {
+//     let mut a = A::default();
+//
+//     <A as AsMut<[T]>>::as_mut(&mut a).clone_from_slice(slice);
+//
+//     a
+// }
 
 
 

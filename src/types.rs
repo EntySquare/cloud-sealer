@@ -17,14 +17,14 @@ pub fn varuint(number: u64, buf: &mut [u8; 32]) -> &[u8] {
 
 pub fn miner_id_to_prover_id(miner_id: u64) -> [u8; 32] {
     let mut buf = [0; 32];
-    let mut buf2 = &mut [0; 32];
-    let mut prover_id = varuint(miner_id, &mut buf);
+    let mut buf2 =  [0; 32];
+    let  prover_id:&[u8] = varuint(miner_id, &mut buf);
     for i in 0..32 {
         if i < prover_id.len() {
             buf2[i] = prover_id[i];
         }
     }
-    *buf2
+    buf2
 }
 
 #[test]

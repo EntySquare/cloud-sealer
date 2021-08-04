@@ -3,18 +3,12 @@ use std::env;
 use std::fs::File;
 use std::io::Read;
 
-use anyhow::{bail, ensure, Error, Result};
+use anyhow::{bail, Error, Result};
 // use base64::{decode, encode};
 use filecoin_hashers::Hasher;
-use filecoin_proofs::{constants, ProverId, SealCommitOutput, SectorSize};
-use filecoin_proofs::{Labels as RawLabels, with_shape};
-use filecoin_proofs::constants::{
-    SECTOR_SIZE_16_KIB, SECTOR_SIZE_16_MIB, SECTOR_SIZE_1_GIB, SECTOR_SIZE_2_KIB, SECTOR_SIZE_32_GIB,
-    SECTOR_SIZE_32_KIB, SECTOR_SIZE_4_KIB, SECTOR_SIZE_512_MIB, SECTOR_SIZE_64_GIB, SECTOR_SIZE_8_MIB,
-    SectorShape16KiB, SectorShape16MiB, SectorShape1GiB, SectorShape2KiB,
-    SectorShape32GiB, SectorShape32KiB, SectorShape4KiB, SectorShape512MiB,
-    SectorShape64GiB, SectorShape8MiB,
-};
+use filecoin_proofs::{constants, SectorSize};
+use filecoin_proofs::{with_shape};
+use filecoin_proofs::constants::{SectorShape2KiB, SectorShape32GiB,  SectorShape512MiB, SectorShape64GiB, SectorShape8MiB};
 use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
 // use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
@@ -29,183 +23,7 @@ use storage_proofs_core::sector::SectorId;
 
 mod http;
 mod types;
-
-static mut EVENTING: bool = false;
-static mut DEBUG: bool = false;
-static mut PERSISTING: bool = false;
-static mut TMP_PATH: String = String::new();
-static mut NATS_URL: String = String::new();
-static mut SECTOR_DIR: String = String::new();
-static mut MINER_IP: String = String::new();
-static mut MINER_IDSTR: String = String::new();
-static mut JOB_NODE_NAME: String = String::new();
-static mut TASK_SECTOR_TYPE: String = String::new();
-static mut TASK_TYP: String = String::new();
-static mut POD_IP: String = String::new();
-static mut PROOF_TYPE: u64 = 0;
-static mut RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR: u64 = 500;
-static mut COPY_FULL_GI_B: u64 = 0;
-static mut SECTOR_MINER_ID: u64 = 0;
-static mut SECTOR_NUMBER: u64 = 0;
-
-static mut PARAMS: Vec<u8> = vec![];
-
-pub const REGISTERED_SEAL_PROOF_STACKED_DRG2KI_BV1: u64 = 0;
-pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1: u64 = 3;
-pub const REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1: u64 = 8;
-pub const SECTOR_TYPE_2K: &str = "2KiB";
-pub const READ_PIECE: &str = "read-piece";
-pub const WINNING_POST: &str = "winning-post";
-pub const WINDOW_POST: &str = "window-post";
-
-pub unsafe fn env_init() {
-    let mut key = "EVENTING";
-    match env::var(key) {
-        Ok(_) => unsafe {
-            EVENTING = false;
-        },
-        Err(_) => EVENTING = true
-    }
-    key = "FILTAB_DEBUG";
-    match env::var(key) {
-        Ok(_) => {
-            DEBUG = false;
-        }
-        Err(_) => DEBUG = true
-    }
-    key = "PERSISTING";
-    match env::var(key) {
-        Ok(_) => {
-            PERSISTING = false;
-        }
-        Err(_) => PERSISTING = true
-    }
-    key = "TMP_PATH";
-    match env::var(key) {
-        Ok(val) => {
-            TMP_PATH = val.to_owned();
-        }
-        Err(_) => TMP_PATH = "./tmp".to_string(),
-    }
-    key = "NATS_SERVER";
-    match env::var(key) {
-        Ok(val) => {
-            NATS_URL = val.to_owned();
-        }
-        Err(_) => NATS_URL = "http://localhost:4222".to_string(),
-    }
-    key = "SECTOR_DIR";
-    match env::var(key) {
-        Ok(val) => {
-            SECTOR_DIR = val.to_owned();
-        }
-        Err(_) => SECTOR_DIR = "pod".to_string(),
-    }
-    key = "MINER_IP";
-    match env::var(key) {
-        Ok(val) => {
-            MINER_IP = val.to_owned();
-        }
-        Err(_) => {
-            if DEBUG {
-                MINER_IP = "127.0.0.1".to_string();
-            }
-        }
-    }
-    key = "PROOF_TYPE";
-    match env::var(key) {
-        Ok(val) => {
-            if (val == "3") {
-                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1;
-            } else if (val == "8") {
-                PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1_1;
-            }
-        }
-        Err(e) => PROOF_TYPE = REGISTERED_SEAL_PROOF_STACKED_DRG32GI_BV1,
-    }
-    key = "SECTOR_MINER_ID";
-    match env::var(key) {
-        Ok(val) => {
-            MINER_IDSTR = val.to_owned();
-            SECTOR_MINER_ID = val.parse::<u64>().unwrap();
-        }
-        Err(e) => SECTOR_MINER_ID = "0".parse::<u64>().unwrap(),
-    }
-    key = "SECTOR_NUMBER";
-    match env::var(key) {
-        Ok(val) => {
-            SECTOR_NUMBER = val.parse::<u64>().unwrap();
-        }
-        Err(e) => SECTOR_NUMBER = "0".parse::<u64>().unwrap(),
-    }
-    key = "TASK_SECTOR_TYPE";
-    match env::var(key) {
-        Ok(val) => {
-            TASK_SECTOR_TYPE = val.to_owned();
-        }
-        Err(e) => TASK_SECTOR_TYPE = String::from(""),
-    }
-    if TASK_SECTOR_TYPE == SECTOR_TYPE_2K {};
-    key = "TASK_TYPE";
-    match env::var(key) {
-        Ok(val) => {
-            TASK_TYP = val.to_owned();
-        }
-        Err(e) => println!("task not defined : {}", e),
-    }
-    key = "JOB_POD_NAME";
-    match env::var(key) {
-        Ok(val) => {
-            match env::var(val) {
-                Ok(addrs) => {
-                    // POD_IP = addrs;
-                    // println!("current pod IP is : ", POD_IP)
-                }
-                Err(e) => panic!("{}", e),
-            }
-        }
-        Err(_) => {
-            if TASK_TYP == READ_PIECE || TASK_TYP == WINDOW_POST || TASK_TYP == WINNING_POST {} else {
-                panic!("fail to seek JOB_POD_NAME ");
-            }
-        }
-    }
-    key = "RESERVE_GIB_FOR_COPY_SECTOR";
-    match env::var(key) {
-        Ok(val) => {
-            COPY_FULL_GI_B = val.parse::<u64>().unwrap();
-        }
-        _ => {}
-    }
-    key = "PARAMS";
-    match env::var(key) {
-        Ok(val) => {
-            println!("PARAMS =>{}", val);
-            if TASK_TYP == WINDOW_POST {} else {
-                PARAMS = base64::decode(val.clone()).unwrap();
-            }
-        }
-        _ => {}
-    }
-    key = "RESERVE_GIB_FOR_SYSTEM_AND_LAST_UNSEALED_SECTOR";
-    match env::var(key) {
-        Ok(val) => {
-            RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = val.parse::<u64>().unwrap();
-        }
-        Err(_) => RESERVE_GI_BFOR_SYSTEM_AND_UNSEALED_SECTOR = 500,
-    }
-    key = "JOB_NODE_NAME";
-    match env::var(key) {
-        Ok(val) => {
-            JOB_NODE_NAME = val.to_owned();
-        }
-        Err(_) => {
-            if TASK_TYP == READ_PIECE {
-                println!("JOB_NODE_NAME env have not set")
-            }
-        }
-    }
-}
+mod structure;
 
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -306,7 +124,6 @@ for VanillaSealProof
     fn try_into(self) -> Result<Vec<Vec<RawVanillaSealProof<Tree>>>> {
         use std::any::Any;
         use VanillaSealProof::*;
-
         match self {
             StackedDrg2KiBV1(raw) => {
                 if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
@@ -367,12 +184,13 @@ struct Commit2In {
 }
 
 fn main() {
-    unsafe {
+        let my_env= structure::my_env::structure_env();
+    println!("{:?}",my_env);
         println!("run main ------------------");
         let res = File::open("./params/c2.params").unwrap();
         let commit2: Commit2In = serde_json::from_reader(res).unwrap();
 
-        let mut scp1o: SealCommitPhase1Output = serde_json::from_slice(
+        let scp1o2: SealCommitPhase1Output = serde_json::from_slice(
             base64_url::decode(commit2.phase_1_out.as_str()).unwrap().as_slice()
         ).expect("serde_json err 001");
 
@@ -381,20 +199,23 @@ fn main() {
             Ok(val) => val.parse::<u64>().unwrap(),
             Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
         };
+        let sector_number = match env::var("SECTOR_NUMBER") {
+            Ok(val) => val.parse::<u64>().unwrap(),
+            Err(..) => 0,
+        };
 
         // let mut miner_id = SECTOR_MINER_ID.clone();
-        let mut prover_id = types::miner_id_to_prover_id(miner_id);
+        let prover_id = types::miner_id_to_prover_id(miner_id);
 
-        let mut scp1o2 = scp1o.clone();
+        // let mut scp1o2 = scp1o.clone();
         // seal_commit_phase2_inner(scp1o.unwrap());
         with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
         scp1o2,
         prover_id,
-        SECTOR_NUMBER.clone(),
-    )
-    }
+        sector_number,
+    );
     // println!("{:?}", scp1o);
 }
 
