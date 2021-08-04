@@ -126,35 +126,35 @@ for VanillaSealProof
         use VanillaSealProof::*;
         match self {
             StackedDrg2KiBV1(raw) => {
-                if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
+                if let Some(raw) = <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
                     Ok(raw.clone())
                 } else {
                     bail!("cannot convert 2kib into different structure")
                 }
             }
             StackedDrg8MiBV1(raw) => {
-                if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
+                if let Some(raw) = <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
                     Ok(raw.clone())
                 } else {
                     bail!("cannot convert 8Mib into different structure")
                 }
             }
             StackedDrg512MiBV1(raw) => {
-                if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
+                if let Some(raw) = <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
                     Ok(raw.clone())
                 } else {
                     bail!("cannot convert 512Mib into different structure")
                 }
             }
             StackedDrg32GiBV1(raw) => {
-                if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
+                if let Some(raw) = <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
                     Ok(raw.clone())
                 } else {
                     bail!("cannot convert 32gib into different structure")
                 }
             }
             StackedDrg64GiBV1(raw) => {
-                if let Some(raw) = Any::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
+                if let Some(raw) = <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw) {
                     Ok(raw.clone())
                 } else {
                     bail!("cannot convert 64gib into different structure")
