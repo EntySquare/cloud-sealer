@@ -184,8 +184,8 @@ struct Commit2In {
 }
 
 fn main() {
-        let my_env= structure::my_env::structure_env();
-    println!("{:?}",my_env);
+        // let my_env= structure::my_env::structure_env();
+        // println!("{:?}",my_env);
         println!("run main ------------------");
         let res = File::open("./params/c2.params").unwrap();
         let commit2: Commit2In = serde_json::from_reader(res).unwrap();
