@@ -1,1 +1,1 @@
-pub mod filecoin_proofs_api;
+pub mod ent_proofs_api;

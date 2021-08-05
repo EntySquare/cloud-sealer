@@ -4,7 +4,7 @@ use std::fs::File;
 use filecoin_proofs::with_shape;
 use serde::{Deserialize, Serialize};
 
-use api::filecoin_proofs_api::seal_commit_phase2_inner;
+use api::ent_proofs_api::seal_commit_phase2_inner;
 
 mod api;
 mod http;
@@ -26,7 +26,7 @@ fn main() {
 
     let res = File::open("./params/c2.params").unwrap();
     let commit2: Commit2In = serde_json::from_reader(res).unwrap();
-    let scp1o2: api::filecoin_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
+    let scp1o2: api::ent_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
         base64_url::decode(commit2.phase_1_out.as_str())
             .unwrap()
             .as_slice(),
