@@ -1,12 +1,10 @@
 use std::env;
 use std::fs::File;
-use std::io::Read;
 
-use anyhow::{Error, Result};
 use filecoin_proofs::with_shape;
 use serde::{Deserialize, Serialize};
 
-use crate::api::filecoin_proofs_api::seal_commit_phase2_inner;
+use api::filecoin_proofs_api::seal_commit_phase2_inner;
 
 mod api;
 mod http;
@@ -55,9 +53,9 @@ fn main() {
     );
 }
 
-pub fn open_file() -> Result<String, Error> {
-    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    Ok(contents)
-}
+// pub fn open_file() -> Result<String, Error> {
+//     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
+//     let mut contents = String::new();
+//     file.read_to_string(&mut contents).unwrap();
+//     Ok(contents)
+// }

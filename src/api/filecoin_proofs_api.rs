@@ -8,7 +8,6 @@ use filecoin_proofs::constants::{
     SectorShape2KiB, SectorShape32GiB, SectorShape512MiB, SectorShape64GiB, SectorShape8MiB,
 };
 use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
-// use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
 use serde::{Deserialize, Serialize};
 use storage_proofs_core::api_version::ApiVersion;
@@ -56,9 +55,11 @@ impl RegisteredSealProof {
     pub fn sector_size(self) -> SectorSize {
         use RegisteredSealProof::*;
         let size = match self {
+            StackedDrg2KiBV1 | StackedDrg2KiBV1_1 => constants::SECTOR_SIZE_2_KIB,
+            StackedDrg8MiBV1 | StackedDrg8MiBV1_1 => constants::SECTOR_SIZE_8_MIB,
+            StackedDrg512MiBV1 | StackedDrg512MiBV1_1 => constants::SECTOR_SIZE_512_MIB,
             StackedDrg32GiBV1 | StackedDrg32GiBV1_1 => constants::SECTOR_SIZE_32_GIB,
             StackedDrg64GiBV1 | StackedDrg64GiBV1_1 => constants::SECTOR_SIZE_64_GIB,
-            _ => 0,
         };
         SectorSize(size)
     }
@@ -93,14 +94,90 @@ impl RegisteredSealProof {
         }
     }
 
+    fn nonce(self) -> u64 {
+        #[allow(clippy::match_single_binding)]
+        match self {
+            // If we ever need to change the nonce for any given RegisteredSealProof, match it here.
+            _ => 0,
+        }
+    }
+
     fn porep_id(self) -> [u8; 32] {
         let mut porep_id = [0; 32];
         let registered_proof_id = self as u64;
-        let nonce: u64 = 0;
+        // let nonce: u64 = 0;
+        let nonce = self.nonce();
 
         porep_id[0..8].copy_from_slice(&registered_proof_id.to_le_bytes());
         porep_id[8..16].copy_from_slice(&nonce.to_le_bytes());
         porep_id
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub enum VanillaSealProof {
+    StackedDrg2KiBV1(Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>),
+    StackedDrg8MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>),
+    StackedDrg512MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>),
+    StackedDrg32GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>),
+    StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
+}
+
+impl VanillaSealProof {
+    #[allow(clippy::ptr_arg)]
+    fn from_raw<Tree: 'static + MerkleTreeTrait>(
+        proof: RegisteredSealProof,
+        proofs: &Vec<Vec<RawVanillaSealProof<Tree>>>,
+    ) -> Result<Self> {
+        use std::any::Any;
+        use RegisteredSealProof::*;
+        match proof {
+            StackedDrg2KiBV1 | StackedDrg2KiBV1_1 => {
+                if let Some(proofs) =
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>>(proofs)
+                {
+                    Ok(VanillaSealProof::StackedDrg2KiBV1(proofs.clone()))
+                } else {
+                    bail!("invalid proofs provided")
+                }
+            }
+            StackedDrg8MiBV1 | StackedDrg8MiBV1_1 => {
+                if let Some(proofs) =
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>>(proofs)
+                {
+                    Ok(VanillaSealProof::StackedDrg8MiBV1(proofs.clone()))
+                } else {
+                    bail!("invalid proofs provided")
+                }
+            }
+            StackedDrg512MiBV1 | StackedDrg512MiBV1_1 => {
+                if let Some(proofs) =
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>>(proofs)
+                {
+                    Ok(VanillaSealProof::StackedDrg512MiBV1(proofs.clone()))
+                } else {
+                    bail!("invalid proofs provided")
+                }
+            }
+            StackedDrg32GiBV1 | StackedDrg32GiBV1_1 => {
+                if let Some(proofs) =
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>>(proofs)
+                {
+                    Ok(VanillaSealProof::StackedDrg32GiBV1(proofs.clone()))
+                } else {
+                    bail!("invalid proofs provided")
+                }
+            }
+            StackedDrg64GiBV1 | StackedDrg64GiBV1_1 => {
+                if let Some(proofs) =
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>>(proofs)
+                {
+                    Ok(VanillaSealProof::StackedDrg64GiBV1(proofs.clone()))
+                } else {
+                    bail!("invalid proofs provided")
+                }
+            }
+        }
     }
 }
 
@@ -162,15 +239,6 @@ for VanillaSealProof
     }
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum VanillaSealProof {
-    StackedDrg2KiBV1(Vec<Vec<RawVanillaSealProof<SectorShape2KiB>>>),
-    StackedDrg8MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape8MiB>>>),
-    StackedDrg512MiBV1(Vec<Vec<RawVanillaSealProof<SectorShape512MiB>>>),
-    StackedDrg32GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape32GiB>>>),
-    StackedDrg64GiBV1(Vec<Vec<RawVanillaSealProof<SectorShape64GiB>>>),
-}
-
 pub fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(
     scp1o: SealCommitPhase1Output,
     prover_id: [u8; 32],
@@ -196,7 +264,7 @@ pub fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(
     let replica_id: Fr = replica_id.into();
 
     let co = filecoin_proofs::types::SealCommitPhase1Output {
-        vanilla_proofs: vanilla_proofs.try_into().unwrap(),
+        vanilla_proofs: vanilla_proofs.try_into().expect("vanilla_proofs error"),
         comm_r,
         comm_d,
         replica_id: replica_id.into(),
