@@ -34,16 +34,16 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-#[test]
-pub fn open_file() -> Result<String, dyn std::error::Error> {
-    use std::io::Read;
-    // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
-    let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    print!("{}", contents);
-    Ok(contents)
-}
+// #[test]
+// pub fn open_file() -> Result<String, dyn std::error::Error> {
+//     use std::io::Read;
+//     // let mut file = std::fs::File::open("/Users/nateyang/Documents/Documents/c2.params").unwrap();
+//     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
+//     let mut contents = String::new();
+//     file.read_to_string(&mut contents).unwrap();
+//     print!("{}", contents);
+//     Ok(contents)
+// }
 
 // fn clone_into_array<A, T>(slice: &[T]) -> A
 //     where

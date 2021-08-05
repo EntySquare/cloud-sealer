@@ -29,6 +29,6 @@ pub fn miner_id_to_prover_id(miner_id: u64) -> [u8; 32] {
 
 #[test]
 pub fn test_unsigned_varint() {
-    let buf2 =  miner_id_to_prover_id(98876987);
+    let buf2 =  miner_id_to_prover_id(1000);
     println!("C2 — prover_id: {:?}", buf2);
 }
