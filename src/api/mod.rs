@@ -1,1 +1,1 @@
-pub mod ent_proofs_api;
+pub mod enty_proofs_api;
