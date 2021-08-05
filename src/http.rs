@@ -7,8 +7,6 @@
 // use serde_json::value::Value;
 // use unsigned_varint::encode;
 
-
-
 #[tokio::main]
 #[test]
 async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
@@ -18,11 +16,13 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let client = reqwest::Client::new();
-    let resp = client.post("http://0.0.0.0:7788/cloud")
+    let resp = client
+        .post("http://0.0.0.0:7788/cloud")
         .body("the exact body that is sent")
         .send()
         .await?
-        .json::<HashMap<String, String>>().await?;
+        .json::<HashMap<String, String>>()
+        .await?;
 
     println!("resp={:#?}", resp);
     let value_key = resp.get("c1out").unwrap().clone();
@@ -45,9 +45,6 @@ pub fn open_file() -> Result<String, dyn std::error::Error> {
     Ok(contents)
 }
 
-
-
-
 // fn clone_into_array<A, T>(slice: &[T]) -> A
 //     where
 //
@@ -61,10 +58,6 @@ pub fn open_file() -> Result<String, dyn std::error::Error> {
 //
 //     a
 // }
-
-
-
-
 
 // #[tokio::main]
 // #[test]
