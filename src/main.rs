@@ -184,17 +184,14 @@ struct Commit2In {
 }
 
 fn main() {
-        // let my_env= structure::my_env::structure_env();
-        // println!("{:?}",my_env);
         println!("run main ------------------");
+
         let res = File::open("./params/c2.params").unwrap();
         let commit2: Commit2In = serde_json::from_reader(res).unwrap();
-
         let scp1o2: SealCommitPhase1Output = serde_json::from_slice(
             base64_url::decode(commit2.phase_1_out.as_str()).unwrap().as_slice()
         ).expect("serde_json err 001");
 
-        // println!("{:#?}",scp1o);
         let miner_id = match env::var("SECTOR_MINER_ID") {
             Ok(val) => val.parse::<u64>().unwrap(),
             Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
@@ -204,11 +201,8 @@ fn main() {
             Err(..) => 0,
         };
 
-        // let mut miner_id = SECTOR_MINER_ID.clone();
         let prover_id = types::miner_id_to_prover_id(miner_id);
 
-        // let mut scp1o2 = scp1o.clone();
-        // seal_commit_phase2_inner(scp1o.unwrap());
         with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
@@ -216,7 +210,6 @@ fn main() {
         prover_id,
         sector_number,
     );
-    // println!("{:?}", scp1o);
 }
 
 fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPhase1Output, prover_id: [u8; 32], sector_id: u64) {
@@ -250,7 +243,7 @@ fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(scp1o: SealCommitPh
 
     let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sid);
 
-    println!("{:#?}", output);
+    println!("{:?}", output);
     //
     // Ok(SealCommitPhase2Output {
     //     proof: output.proof,
