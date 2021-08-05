@@ -3,16 +3,14 @@ use std::convert::TryInto;
 use anyhow::{bail, Error, Result};
 // use base64::{decode, encode};
 use filecoin_hashers::Hasher;
+use filecoin_proofs::{constants, SectorSize};
 use filecoin_proofs::constants::{
     SectorShape2KiB, SectorShape32GiB, SectorShape512MiB, SectorShape64GiB, SectorShape8MiB,
 };
 use filecoin_proofs::types::VanillaSealProof as RawVanillaSealProof;
-use filecoin_proofs::{constants, SectorSize};
 // use filecoin_proofs_api::seal::{SealCommitPhase1Output};
 use paired::bls12_381::Fr;
-// DEBUG todo
 use serde::{Deserialize, Serialize};
-// use crate::http::u642;
 use storage_proofs_core::api_version::ApiVersion;
 use storage_proofs_core::merkle::MerkleTreeTrait;
 use storage_proofs_core::sector::SectorId;
@@ -107,7 +105,7 @@ impl RegisteredSealProof {
 }
 
 impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>>>
-    for VanillaSealProof
+for VanillaSealProof
 {
     type Error = Error;
 
@@ -117,7 +115,7 @@ impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>
         match self {
             StackedDrg2KiBV1(raw) => {
                 if let Some(raw) =
-                    <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
                 {
                     Ok(raw.clone())
                 } else {
@@ -126,7 +124,7 @@ impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>
             }
             StackedDrg8MiBV1(raw) => {
                 if let Some(raw) =
-                    <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
                 {
                     Ok(raw.clone())
                 } else {
@@ -135,7 +133,7 @@ impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>
             }
             StackedDrg512MiBV1(raw) => {
                 if let Some(raw) =
-                    <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
                 {
                     Ok(raw.clone())
                 } else {
@@ -144,7 +142,7 @@ impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>
             }
             StackedDrg32GiBV1(raw) => {
                 if let Some(raw) =
-                    <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
                 {
                     Ok(raw.clone())
                 } else {
@@ -153,7 +151,7 @@ impl<Tree: 'static + MerkleTreeTrait> TryInto<Vec<Vec<RawVanillaSealProof<Tree>>
             }
             StackedDrg64GiBV1(raw) => {
                 if let Some(raw) =
-                    <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
+                <dyn Any>::downcast_ref::<Vec<Vec<RawVanillaSealProof<Tree>>>>(&raw)
                 {
                     Ok(raw.clone())
                 } else {
@@ -209,8 +207,4 @@ pub fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(
     let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sid);
 
     println!("{:?}", output);
-    //
-    // Ok(SealCommitPhase2Output {
-    //     proof: output.proof,
-    // });
 }

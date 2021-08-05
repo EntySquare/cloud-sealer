@@ -3,14 +3,11 @@ use std::fs::File;
 use std::io::Read;
 
 use anyhow::{Error, Result};
-// use base64::{decode, encode};
 use filecoin_proofs::with_shape;
-// use filecoin_proofs_api::seal::{SealCommitPhase1Output};
-// DEBUG todo
 use serde::{Deserialize, Serialize};
-// use crate::http::u642;
+
 use crate::api::filecoin_proofs_api::seal_commit_phase2_inner;
-// use filecoin_proofs_api::seal;
+
 mod api;
 mod http;
 mod structure;
@@ -36,7 +33,7 @@ fn main() {
             .unwrap()
             .as_slice(),
     )
-    .expect("serde_json err 001");
+        .expect("serde_json err 001");
 
     let miner_id = match env::var("SECTOR_MINER_ID") {
         Ok(val) => val.parse::<u64>().unwrap(),
@@ -62,6 +59,5 @@ pub fn open_file() -> Result<String, Error> {
     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
-    // print!("{}", contents);
     Ok(contents)
 }
