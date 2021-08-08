@@ -26,7 +26,7 @@ bellperson = { version = "0.14.1", default-features = false }
 fr32 = { version = "~1.0", default-features = false }
 
 [patch.crates-io]
-bellperson = { path = "../entysnark"}
+bellperson = { path = "../entysnark" }
 
 
 [features]
