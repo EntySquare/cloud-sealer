@@ -20,7 +20,7 @@ struct Commit2In {
     #[serde(rename = "Phase1Out")]
     phase_1_out: String,
 }
-
+// #[cfg(feature = "gpu")]
 fn main() {
     println!("run main ------------------");
 
