@@ -43,7 +43,7 @@ fn main() {
     };
 
     let prover_id = types::miner_id_to_prover_id(miner_id);
-    println!("scp1o2:{:?}",scp1o2);
+    // println!("scp1o2:{:?}",scp1o2);
     println!("=-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-=");
     println!("u64::from(scp1o2.registered_proof.sector_size(): {:}",u64::from(scp1o2.registered_proof.sector_size()));
     with_shape!(
