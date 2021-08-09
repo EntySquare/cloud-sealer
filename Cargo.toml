@@ -11,8 +11,8 @@ lazy_static = "1.2"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1.0.46"
-filecoin-proofs = { path = "../filecoin-proof-debug", version = "8.0.2", default-features = false }
-#filecoin-proofs-api = { version = "8.0.1" }
+filecoin-proofs = { path = "../filecoin-proof-debug", version = "8.0.2", default-features = true }
+filecoin-proofs-api = { version = "8.0.1" }
 storage-proofs-core = { version = "8.0.3" }
 #filecoin-proofs = { version = "8.0.2" }
 paired = { version = "0.22.0" }
@@ -22,15 +22,19 @@ resize-slice = "0.1.3"
 filecoin-hashers = "3.0.3"
 serde = { version = "1.0", features = ["rc", "derive"] }
 base64-url = "1.4.10"
-bellperson = { version = "0.14.1", default-features = false }
-fr32 = { version = "~1.0", default-features = false }
+
+#bellperson = { version = "0.14.1", default-features = false }
+#fr32 = { version = "~1.0", default-features = false }
+
+#[features]
+#default = ["pairing", "gpu"]
+#blst = ["filecoin-proofs/blst", "bellperson/blst", "storage-proofs-core/blst", "fr32/blst"]
+#gpu = ["filecoin-proofs/gpu", "filecoin-hashers/gpu", "storage-proofs-core/gpu", "bellperson/gpu", "fr32/gpu"]
+#pairing = ["filecoin-proofs/pairing", "bellperson/pairing", "storage-proofs-core/pairing", "fr32/pairing"]
+
 
 [patch.crates-io]
-bellperson = { path = "../entysnark" }
+bellperson = { path = "../entysnark" , default-features = true }
 
 
-[features]
-blst = ["filecoin-proofs/blst", "bellperson/blst", "storage-proofs-core/blst", "fr32/blst"]
-default = ["pairing", "gpu"]
-gpu = ["filecoin-proofs/gpu", "filecoin-hashers/gpu", "storage-proofs-core/gpu", "bellperson/gpu", "fr32/gpu"]
-pairing = ["filecoin-proofs/pairing", "bellperson/pairing", "storage-proofs-core/pairing", "fr32/pairing"]
+
