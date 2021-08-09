@@ -32,7 +32,7 @@ fn main() {
             .as_slice(),
     )
         .expect("serde_json err 001");
-
+    drop(commit2);
     let miner_id = match env::var("SECTOR_MINER_ID") {
         Ok(val) => val.parse::<u64>().unwrap(),
         Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
