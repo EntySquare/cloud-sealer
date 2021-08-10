@@ -35,7 +35,7 @@ fn main() {
     )
         .expect("serde_json err 001");
 
-    println!("{:?}",scp1o2);
+    // println!("{:?}",scp1o2.);
     drop(commit2);
     let miner_id = match env::var("SECTOR_MINER_ID") {
         Ok(val) => val.parse::<u64>().unwrap(),
