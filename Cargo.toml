@@ -11,7 +11,7 @@ lazy_static = "1.2"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 serde_json = "1.0.46"
-filecoin-proofs = { path = "../filecoin-proof-debug", version = "8.0.2", default-features = false }
+filecoin-proofs = "8.0.2"
 filecoin-proofs-api = { version = "8.0.1" }
 storage-proofs-core = { version = "8.0.3" }
 #filecoin-proofs = { version = "8.0.2" }
@@ -36,6 +36,7 @@ ffi-toolkit = "0.5.0"
 
 [patch.crates-io]
 bellperson = { path = "../entysnark" , default-features = false }
+filecoin-proofs = { path = "../filecoin-proof-debug" , default-features = false }
 
 
 
