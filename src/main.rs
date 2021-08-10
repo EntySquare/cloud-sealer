@@ -13,6 +13,7 @@ mod api;
 mod http;
 mod structure;
 mod types;
+mod util;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Commit2In {
@@ -50,9 +51,9 @@ fn main() {
 
     let prover_id = types::miner_id_to_prover_id(miner_id);
     // println!("scp1o2:{:?}",scp1o2);
-    println!("========== registered_proof.sector_size(): {:}",u64::from(scp1o2.registered_proof.sector_size()));
-    println!("========== sector_number: {:}",sector_number);
-    println!("========== miner_id: {:}",miner_id);
+    println!("========== registered_proof.sector_size(): {:}", u64::from(scp1o2.registered_proof.sector_size()));
+    println!("========== sector_number: {:}", sector_number);
+    println!("========== miner_id: {:}", miner_id);
     with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
@@ -60,8 +61,35 @@ fn main() {
         prover_id,
         sector_number,
     );
-    println!("");
+    println!();
     println!("========== run main time: {:?}", now.elapsed());
+}
+
+fn send_event(sbj: String, src: Vec<u8>) {
+    println!("send event to miner subject is: {:?}", sbj);
+
+    let rand_str = util::rand_string::random_string(15);
+    let nats_url = match env::var("NATS_SERVER") {
+        Ok(val) => val.to_string().unwrap(),
+        Err(..) => "http://localhost:4222",
+    };
+    // Connect to a server
+    let nc = nats::connect(nats_url);
+    if nc.is_err() {
+        println!("send event connection error : {:?}", err);
+        send_event(sbj, src);
+        return;
+    }
+    // // Simple Publisher
+    // err = nc.Publish(sbj, src);
+    // if err != nil {
+    //     log.Println("send event publish error : ", err)
+    //     send_event(sbj, src);
+    //     return;
+    // }
+    //
+    // // Close connection
+    // nc.Close()
 }
 
 // pub fn open_file() -> Result<String, Error> {
