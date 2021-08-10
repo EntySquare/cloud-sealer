@@ -60,6 +60,7 @@ fn main() {
         prover_id,
         sector_number,
     );
+    println!("");
     println!("========== run main time: {:?}", now.elapsed());
 }
 
