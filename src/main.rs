@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use api::enty_proofs_api::seal_commit_phase2_inner;
 // use ffi_toolkit::{catch_panic_response, raw_ptr};
 use std::io::Read;
+use tokio::time::Instant;
 
 mod api;
 mod http;
@@ -25,7 +26,8 @@ struct Commit2In {
 
 //cargo  build --release --no-default-features --features multicore-sdr --features pairing,gpu
 fn main() {
-    println!("run main ------------------");
+    println!("========== run main");
+    let now = Instant::now();
     let res = File::open("./params/c2.params").unwrap();
     let commit2: Commit2In = serde_json::from_reader(res).unwrap();
     let scp1o2: api::enty_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
@@ -48,8 +50,9 @@ fn main() {
 
     let prover_id = types::miner_id_to_prover_id(miner_id);
     // println!("scp1o2:{:?}",scp1o2);
-    println!("=-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-==-=-=");
-    println!("u64::from(scp1o2.registered_proof.sector_size(): {:}",u64::from(scp1o2.registered_proof.sector_size()));
+    println!("========== registered_proof.sector_size(): {:}",u64::from(scp1o2.registered_proof.sector_size()));
+    println!("========== sector_number: {:}",sector_number);
+    println!("========== miner_id: {:}",miner_id);
     with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
@@ -57,6 +60,7 @@ fn main() {
         prover_id,
         sector_number,
     );
+    println!("========== run main time: {:?}", now.elapsed());
 }
 
 // pub fn open_file() -> Result<String, Error> {
