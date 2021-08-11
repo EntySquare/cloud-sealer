@@ -65,7 +65,7 @@ fn main() {
     println!("========== run main time: {:?}", now.elapsed());
 }
 
-fn send_event(sbj: String, src: Vec<u8>) {
+fn send_event(sbj: &str, src: Vec<u8>) {
     println!("send event to miner subject is: {:?}", sbj);
 
     let rand_str = util::rand_string::random_string(15);
@@ -74,12 +74,16 @@ fn send_event(sbj: String, src: Vec<u8>) {
         Err(..) => "http://localhost:4222",
     };
     // Connect to a server
-    let nc = nats::connect(nats_url);
-    if nc.is_err() {
-        println!("send event connection error : {:?}", err);
-        send_event(sbj, src);
-        return;
-    }
+    let nc = nats::connect(nats_url)?;
+    // if nc.is_err() {
+    //     println!("send event connection error : {:?}", err);
+    //     send_event(sbj, src);
+    //     return;
+    // }
+
+    nc.publish(sbj, &src);
+    nc.close()
+
     // // Simple Publisher
     // err = nc.Publish(sbj, src);
     // if err != nil {
