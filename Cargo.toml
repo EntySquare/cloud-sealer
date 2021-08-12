@@ -25,7 +25,8 @@ filecoin-hashers = "3.0.3"
 serde = { version = "1.0", features = ["rc", "derive"] }
 base64-url = "1.4.10"
 hyper = "0.14.11"
-
+nats = "0.11.0"
+rand="0.8.0"
 
 [features]
 default = ["pairing", "gpu", "multicore-sdr"]

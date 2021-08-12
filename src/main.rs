@@ -1,3 +1,6 @@
+use std::env;
+use std::fs::File;
+
 use filecoin_proofs::with_shape;
 use serde::{Deserialize, Serialize};
 use api::enty_proofs_api::seal_commit_phase2_inner;
@@ -14,6 +17,7 @@ mod api;
 mod http;
 mod structure;
 mod types;
+mod util;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Commit2In {
@@ -116,6 +120,37 @@ async fn main() {
         }
     }
     println!("[cloud-sealer] >>>1: run main end time:{:?}", now.elapsed());
+}
+
+fn send_event(sbj: &str, src: Vec<u8>) {
+    println!("send event to miner subject is: {:?}", sbj);
+
+    let rand_str = util::rand_string::random_string(15);
+    let nats_url = match env::var("NATS_SERVER") {
+        Ok(val) => val.to_string().unwrap(),
+        Err(..) => "http://localhost:4222",
+    };
+    // Connect to a server
+    let nc = nats::connect(nats_url)?;
+    // if nc.is_err() {
+    //     println!("send event connection error : {:?}", err);
+    //     send_event(sbj, src);
+    //     return;
+    // }
+
+    nc.publish(sbj, &src);
+    nc.close()
+
+    // // Simple Publisher
+    // err = nc.Publish(sbj, src);
+    // if err != nil {
+    //     log.Println("send event publish error : ", err)
+    //     send_event(sbj, src);
+    //     return;
+    // }
+    //
+    // // Close connection
+    // nc.Close()
 }
 
 // pub fn open_file() -> Result<String, Error> {
