@@ -97,37 +97,25 @@ async fn main() {
     println!("[cloud-sealer] >>>1: run main end time:{:?}", now.elapsed());
 }
 
-fn send_event(sbj: &str, src: Vec<u8>) {
-    println!("send event to miner subject is: {:?}", sbj);
-
-    let rand_str = util::rand_string::random_string(15);
-    let nats_url = match env::var("NATS_SERVER") {
-        Ok(val) => val.to_string().unwrap(),
-        Err(..) => "http://localhost:4222",
-    };
-    // Connect to a server
-    let nc = nats::connect(nats_url)?;
-    // if nc.is_err() {
-    //     println!("send event connection error : {:?}", err);
-    //     send_event(sbj, src);
-    //     return;
-    // }
-
-    nc.publish(sbj, &src);
-    nc.close()
-
-    // // Simple Publisher
-    // err = nc.Publish(sbj, src);
-    // if err != nil {
-    //     log.Println("send event publish error : ", err)
-    //     send_event(sbj, src);
-    //     return;
-    // }
-    //
-    // // Close connection
-    // nc.Close()
-}
-
+// fn send_event(sbj: &str, src: Vec<u8>) {
+//     println!("send event to miner subject is: {:?}", sbj);
+//
+//     let rand_str = util::rand_string::random_string(15);
+//     let nats_url = match env::var("NATS_SERVER") {
+//         Ok(val) => val.to_string().unwrap(),
+//         Err(..) => "http://localhost:4222",
+//     };
+//     // Connect to a server
+//     let nc = nats::connect(nats_url)?;
+//     // if nc.is_err() {
+//     //     println!("send event connection error : {:?}", err);
+//     //     send_event(sbj, src);
+//     //     return;
+//     // }
+//
+//     nc.publish(sbj, &src);
+//     nc.close()
+// }
 // pub fn open_file() -> Result<String, Error> {
 //     let mut file = std::fs::File::open("/Users/nateyang/Documents/hello.txt").unwrap();
 //     let mut contents = String::new();

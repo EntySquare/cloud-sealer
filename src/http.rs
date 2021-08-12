@@ -59,7 +59,6 @@ async fn http_req2() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let value_key = resp.get("Commit1Out").unwrap().clone();
-    println!("");
     println!("{}", value_key);
     Ok(())
 }
