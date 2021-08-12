@@ -27,6 +27,7 @@ base64-url = "1.4.10"
 hyper = "0.14.11"
 nats = "0.11.0"
 rand="0.8.0"
+json = "0.12.4"
 
 [features]
 default = ["pairing", "gpu", "multicore-sdr"]
