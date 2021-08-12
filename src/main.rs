@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::File;
+// use std::fs::File;
 
 use filecoin_proofs::with_shape;
 use serde::{Deserialize, Serialize};
@@ -27,31 +27,6 @@ struct Commit2In {
     sector_num: i64,
     #[serde(rename = "Phase1Out")]
     phase_1_out: String,
-}
-
-//POST 1
-#[derive(Debug, Serialize, Deserialize)]
-pub struct FetchParams<'a> {
-    #[serde(rename = "SectorNum")]
-    sector_num: &'a str,
-    #[serde(rename = "TaskType")]
-    task_type: &'a str,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Commit2Resp {
-    #[serde(rename = "Commit2Out")]
-    commit_2_out: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct PostResp {
-    #[serde(rename = "SectorNum")]
-    sector_num: String,
-    #[serde(rename = "TaskType")]
-    task_type: String,
-    #[serde(rename = "Body")]
-    body: String,
 }
 
 //cargo  build --release --no-default-features --features multicore-sdr --features pairing,gpu

@@ -1,5 +1,4 @@
 // use std::convert::AsMut;
-use std::fs::File;
 // use std::io::Read;
 
 // use resize_slice::ResizeSlice;
@@ -7,7 +6,6 @@ use std::fs::File;
 // use serde_json::value::Value;
 // use unsigned_varint::encode;
 
-use crate::{FetchParams, PostResp, Commit2In, api};
 use std::collections::HashMap;
 // use reqwest::{Error, Client};
 // use bellperson::ConstraintSystem;
@@ -16,7 +14,7 @@ use std::collections::HashMap;
 // use std::time::Duration;
 // use std::thread;
 // use tokio_core::reactor::Core;
-use hyper::{ HeaderMap};
+use hyper::{HeaderMap};
 use serde_json::value::Value;
 
 #[tokio::main]
@@ -104,6 +102,8 @@ pub async fn post_response(miner_ip: &String, sector_num: &String, task_type: &S
 
 #[test]
 pub fn test_open_file_json() {
+    use crate::{Commit2In, api};
+    use std::fs::File;
     let res = File::open("./params/c2.params").unwrap();
     let commit2: Commit2In = serde_json::from_reader(res).unwrap();
     let scp1o2: api::enty_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
