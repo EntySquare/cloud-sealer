@@ -1,5 +1,7 @@
 // use std::env;
 
+use std::env;
+
 // static SECTOR_TYPE_2k: &'static str = "2KiB";
 // static SECTOR_TYPE_32g: &'static str = "32GiB";
 #[derive(Debug)]
@@ -24,6 +26,44 @@ pub struct MyEnv {
     job_node_name: String,
 }
 
+pub fn structure_env() -> (u64, u64, String, String) {
+    let miner_id = match env::var("SECTOR_MINER_ID") {
+        Ok(val) => val.parse::<u64>().unwrap(),
+        Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
+    };
+    let sector_number = match env::var("SECTOR_NUMBER") {
+        Ok(val) => val.parse::<u64>().unwrap(),
+        Err(..) => 0,
+    };
+    let miner_ip: String = match env::var("MINER_IP") {
+        Ok(val) => val,
+        Err(..) => String::from("127.0.0.1"),
+    };
+    let task_typ = match env::var("TASK_TYPE") {
+        Ok(val) => val,
+        Err(..) => panic!("env TASK_TYPE is null!!!"),
+    };
+    (miner_id, sector_number, miner_ip, task_typ)
+}
+// pub fn structure_env_test() -> (u64, u64, String, String) {
+//     let miner_id = match env::var("SECTOR_MINER_ID") {
+//         Ok(val) => val.parse::<u64>().unwrap(),
+//         Err(..) => 1000,
+//     };
+//     let sector_number = match env::var("SECTOR_NUMBER") {
+//         Ok(val) => val.parse::<u64>().unwrap(),
+//         Err(..) => 0,
+//     };
+//     let miner_ip = match env::var("MINER_IP") {
+//         Ok(val) => val,
+//         Err(..) => String::from("127.0.0.1"),
+//     };
+//     let task_typ = match env::var("TASK_TYPE") {
+//         Ok(val) => val,
+//         Err(..) => String::from("task_typ_test_test"),
+//     };
+//     (miner_id, sector_number, miner_ip, task_typ)
+// }
 /*
 env环境
 构造数据

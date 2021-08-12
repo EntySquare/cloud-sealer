@@ -24,6 +24,10 @@ pub struct SealCommitPhase1Output {
     pub seed: filecoin_proofs::Ticket,
     pub ticket: filecoin_proofs::Ticket,
 }
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SealCommitPhase2Output {
+    pub proof: Vec<u8>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum RegisteredSealProof {
@@ -243,7 +247,7 @@ pub fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(
     scp1o: SealCommitPhase1Output,
     prover_id: [u8; 32],
     sector_id: u64,
-) {
+) -> Result<SealCommitPhase2Output>{
     let sid = SectorId::from(sector_id);
     let SealCommitPhase1Output {
         vanilla_proofs,
@@ -272,7 +276,9 @@ pub fn seal_commit_phase2_inner<Tree: 'static + MerkleTreeTrait>(
         ticket,
     };
 
-    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sid);
+    let output = filecoin_proofs::seal_commit_phase2::<Tree>(config, co, prover_id, sid)?;
 
-    println!("{:?}", output);
+    Ok(SealCommitPhase2Output {
+        proof: output.proof,
+    })
 }

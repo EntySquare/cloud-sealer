@@ -1,11 +1,23 @@
 // use std::convert::AsMut;
-// use std::fs::File;
+use std::fs::File;
 // use std::io::Read;
 
 // use resize_slice::ResizeSlice;
 // use serde_json::to_string;
 // use serde_json::value::Value;
 // use unsigned_varint::encode;
+
+use crate::{FetchParams, PostResp, Commit2In, api};
+use std::collections::HashMap;
+// use reqwest::{Error, Client};
+// use bellperson::ConstraintSystem;
+// use tokio::io::AsyncSeek;
+// use std::fs::File;
+// use std::time::Duration;
+// use std::thread;
+// use tokio_core::reactor::Core;
+use hyper::{ HeaderMap};
+use serde_json::value::Value;
 
 #[tokio::main]
 #[test]
@@ -34,6 +46,75 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[tokio::main]
+#[test]
+async fn http_req2() -> Result<(), Box<dyn std::error::Error>> {
+    use std::collections::HashMap;
+
+    let client = reqwest::Client::new();
+    let resp = client
+        .post("http://127.0.0.1:9999/params")
+        .body("the exact body that is sent")
+        .send()
+        .await?
+        .json::<HashMap<String, String>>()
+        .await?;
+
+    let value_key = resp.get("Commit1Out").unwrap().clone();
+    println!("");
+    println!("{}", value_key);
+    Ok(())
+}
+
+pub async fn post_params(miner_ip: &String, sector_num: &String, task_type: &String) -> Result<HashMap<String, Value>, reqwest::Error> {
+    // post 请求要创建client
+    let client = reqwest::Client::new();
+
+    // 组装header
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "application/json".parse().unwrap());
+
+    // 组装要提交的数据
+    let mut data = HashMap::new();
+    data.insert("SectorNum", sector_num);
+    data.insert("TaskType", task_type);
+
+    // 发起post请求并返回
+    Ok(client.post(format!("http://{}:9999/params", miner_ip)).headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
+}
+
+pub async fn post_response(miner_ip: &String, sector_num: &String, task_type: &String, resp: &String) -> Result<HashMap<String, Value>, reqwest::Error> {
+    // post 请求要创建client
+    let client = reqwest::Client::new();
+
+    // 组装header
+    let mut headers = HeaderMap::new();
+    headers.insert("Content-Type", "application/json".parse().unwrap());
+
+    // 组装要提交的数据
+    let mut data = HashMap::new();
+    data.insert("SectorNum", sector_num);
+    data.insert("TaskType", task_type);
+    data.insert("Body", resp);
+
+    // 发起post请求并返回
+    Ok(client.post(format!("http://{}:9999/params", miner_ip)).headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
+}
+
+
+#[test]
+pub fn test_open_file_json() {
+    let res = File::open("./params/c2.params").unwrap();
+    let commit2: Commit2In = serde_json::from_reader(res).unwrap();
+    let scp1o2: api::enty_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
+        base64_url::decode(commit2.phase_1_out.as_str())
+            .unwrap()
+            .as_slice(),
+    )
+        .expect("serde_json err 001");
+
+    println!("{:?}", scp1o2)
+}
 // #[test]
 // pub fn open_file() -> Result<String, dyn std::error::Error> {
 //     use std::io::Read;
@@ -77,3 +158,4 @@ async fn http_req() -> Result<(), Box<dyn std::error::Error>> {
 //     // 发起post请求并返回
 //     Ok(client.post("http://0.0.0.0:7788/cloud").headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
 // }
+
