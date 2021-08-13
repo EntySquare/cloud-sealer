@@ -82,7 +82,7 @@ async fn main() {
             println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &response_rep.len());
 
             if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &response_rep).await {
-                println!("[cloud-sealer] >>>6: post {} return: {:?}", format!("http://{}:9999/response", &miner_ip), res);
+                // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
             }
             let mut event = json::JsonValue::new_object();
             event["Body"] = response_rep.as_str().into();
