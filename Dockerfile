@@ -8,6 +8,7 @@ ADD . .
 #RUN mkdir -p .cargo
 #COPY Config.toml .cargo/
 COPY Cargo.toml Cargo.lock ./
+COPY ./.gitconfig /root/.gitconfig
 
 RUN git clone https://github.com/EntySquare/entysnark.git ./
 RUN git clone https://github.com/EntySquare/filecoin-proof-debug.git ./
@@ -16,6 +17,7 @@ RUN cargo build --release --no-default-features --features multicore-sdr --featu
 
 FROM golang:1.15 AS builder2
 ENV GOPROXY "https://goproxy.cn"
+ENV GO111MODULE on
 USER root
 WORKDIR /root
 
