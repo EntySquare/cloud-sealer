@@ -1,11 +1,7 @@
-FROM rust:latest as builder1
-# Use prebuilt builder image
 # FROM rust:1.50-prebuilt as builder
-ARG APP=cloud-sealer
+FROM rust:latest as builder1
 
-# New cargo project and copy Rust dependencies (and store as a separate Docker layer)
-# NOTE: must call `cargo vendor` first and add `vendor` folder to git
-RUN USER=root
+USER=root
 WORKDIR /root
 ADD . .
 
@@ -18,9 +14,20 @@ RUN git clone https://github.com/EntySquare/filecoin-proof-debug.git ./
 
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
-FROM ubuntu:18.04
-RUN apt-get update
-COPY --from=builder /usr/local/cargo/bin/$APP /$APP
+FROM golang:1.15 AS builder2
+ENV GOPROXY "https://goproxy.cn"
+USER root
+WORKDIR /root
 
-EXPOSE 7788 4222 9999
-ENTRYPOINT ["/$APP"]
+ADD ./cloud-element .
+COPY go.mod go.sum ./
+RUN go mod download
+
+FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04
+
+RUN apt-get update
+COPY --from=builder1 /usr/local/cargo/bin/cloud-sealer /cloud-sealer
+COPY --from=builder2 /usr/local/cargo/bin/cloud-element /cloud-element
+
+EXPOSE 4222 7788 9999
+#ENTRYPOINT ["/$APP"]
