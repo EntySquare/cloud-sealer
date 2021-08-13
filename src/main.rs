@@ -45,7 +45,7 @@ async fn main() {
     env_json["minerIDStr"] = miner_id.into();
     env_json["sectorNumber"] = sector_number.into();
 
-    let mut file = std::fs::File::create("../env.json").expect("[cloud-sealer] >>>2: err! create failed!");
+    let mut file = std::fs::File::create("./env.json").expect("[cloud-sealer] >>>2: err! create failed!");
     file.write_all(env_json.dump().as_bytes()).expect("[cloud-sealer] >>>2: err! write c2_env.json file !");
     drop(file);
 
@@ -54,10 +54,12 @@ async fn main() {
         commit_1_out = res.get("Commit1Out").unwrap().clone().to_string();
     }
     println!("[cloud-sealer] >>>3: post {} Commit1Out.len: {}", format!("http://{}:9999/params", &miner_ip), commit_1_out.len());
+
     let d: Vec<_> = commit_1_out.split('"').collect(); //去除多余的 "
     let scp1o2: api::enty_proofs_api::SealCommitPhase1Output = serde_json::from_slice(
         base64::decode(d[1]).unwrap().as_slice()
     ).expect("serde_json enty_proofs_api.SealCommitPhase1Output err 001");
+
     println!("[cloud-sealer] >>>4: json api::SealCommitPhase1Output [registered_proof:{:?}] [vanilla_proofs:{:?}] [comm_r:{:?}] [comm_d:{:?}] [replica_id:{:?}] [seed:{:?}] [ticket:{:?}]", scp1o2.registered_proof, scp1o2.vanilla_proofs.type_id(), scp1o2.comm_r.len(),scp1o2.comm_d.len(),scp1o2.replica_id,scp1o2.seed.len(),scp1o2.ticket.len());
 
     //run c2
@@ -92,7 +94,7 @@ async fn main() {
             };
 
             println!("[cloud-sealer] >>>7:  write c2_event.json file...");
-            let mut file = std::fs::File::create("../c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
+            let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
             file.write_all(event.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
 
             println!("[cloud-sealer] >>>1: success main end time:{:?}", now.elapsed());
@@ -101,10 +103,10 @@ async fn main() {
             let str = format!("{:?}", err);
             println!("[cloud-sealer] >>>6: err! seal_commit_phase2_inner : {} ", str);
             let mut event_err = json::JsonValue::new_object();
-            event_err["TaskTyp"] = task_type.as_str().into();
+            // event_err["TaskTyp"] = task_type.as_str().into();
             event_err["Err"] = str.as_str().into();
 
-            let mut file = std::fs::File::create("c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
+            let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
             file.write_all(event_err.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
 
             println!("[cloud-sealer] >>>1: err! main end time:{:?}", now.elapsed());

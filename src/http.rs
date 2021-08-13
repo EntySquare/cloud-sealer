@@ -95,7 +95,7 @@ pub async fn post_response(miner_ip: &String, sector_num: &String, task_type: &S
     data.insert("Body", resp);
 
     // 发起post请求并返回
-    Ok(client.post(format!("http://{}:9999/params", miner_ip)).headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
+    Ok(client.post(format!("http://{}:9999/response", miner_ip)).headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
 }
 
 
