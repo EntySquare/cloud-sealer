@@ -88,40 +88,41 @@ async fn main() {
             commit_2_resp["Commit2Out"] = output.proof.into();
             let commit_2_resp_json = commit_2_resp.dump();
 
-        println!("commit_2_resp_json:{}", commit_2_resp_json);
-        // println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.len());
+            println!("commit_2_resp_json:{}", commit_2_resp_json);
+            println!("3:{:?}", base64::encode(commit_2_resp_json));
+            // println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.len());
 
-        if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &String::from("")).await {
-            // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
+            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &String::from("")).await {
+                // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
+            }
+
+
+            let mut event = json::JsonValue::new_object();
+            event["Body"] = "".into();
+            event["Head"] = {
+                let mut head = json::JsonValue::new_object();
+                head["MsgTyp"] = task_type.as_str().into();
+                head["SectorNum"] = sector_number.to_string().as_str().into();
+                head
+            };
+
+            println!("[cloud-sealer] >>>7:  write c2_event.json file...");
+            let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
+            file.write_all(event.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
+
+            println!("[cloud-sealer] >>>1: success main end time:{:?}", now.elapsed());
         }
+        Err(err) => {
+            let str = format!("{:?}", err);
+            println!("[cloud-sealer] >>>6: err! seal_commit_phase2_inner : {} ", str);
+            let mut event_err = json::JsonValue::new_object();
+            // event_err["TaskTyp"] = task_type.as_str().into();
+            event_err["Err"] = str.as_str().into();
 
+            let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
+            file.write_all(event_err.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
 
-        let mut event = json::JsonValue::new_object();
-        event["Body"] = "".into();
-        event["Head"] = {
-            let mut head = json::JsonValue::new_object();
-            head["MsgTyp"] = task_type.as_str().into();
-            head["SectorNum"] = sector_number.to_string().as_str().into();
-            head
-        };
-
-        println!("[cloud-sealer] >>>7:  write c2_event.json file...");
-        let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
-        file.write_all(event.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
-
-        println!("[cloud-sealer] >>>1: success main end time:{:?}", now.elapsed());
+            println!("[cloud-sealer] >>>1: err! main end time:{:?}", now.elapsed());
+        }
     }
-    Err(err) => {
-        let str = format!("{:?}", err);
-        println!("[cloud-sealer] >>>6: err! seal_commit_phase2_inner : {} ", str);
-        let mut event_err = json::JsonValue::new_object();
-        // event_err["TaskTyp"] = task_type.as_str().into();
-        event_err["Err"] = str.as_str().into();
-
-        let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
-        file.write_all(event_err.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
-
-        println!("[cloud-sealer] >>>1: err! main end time:{:?}", now.elapsed());
-    }
-}
 }
