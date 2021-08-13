@@ -4,7 +4,8 @@ FROM rust:latest AS builder1
 USER root
 WORKDIR /root
 ADD . .
-
+RUN apt-get update
+RUN apt-get install -y git
 #RUN mkdir -p .cargo
 #COPY Config.toml .cargo/
 COPY Cargo.toml Cargo.lock ./
