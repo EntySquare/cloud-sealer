@@ -79,16 +79,20 @@ async fn main() {
             println!("[cloud-sealer] >>>5: success");
             // let proof= String::from_utf8(output.proof).unwrap();
             // println!("{:?}",&proof);
-            let response_rep = base64::encode(output.proof.as_slice());
+            // let response_rep = base64::encode();
+            println!("1:{:?}",output.proof);
+            println!("2:{:?}",output.proof.as_slice());
+            println!("3:{:?}",base64::encode(output.proof.as_slice()));
+            println!("4:{:?}",std::str::from_utf8(&output.proof).unwrap());
 
-            println!("base64:{}", &response_rep);
-            println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &response_rep.len());
+            // println!("output:{}", output.proof.as_slice());
+            println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.len());
 
-            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &response_rep).await {
+            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &String::from("")).await {
                 // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
             }
             let mut event = json::JsonValue::new_object();
-            event["Body"] = response_rep.as_str().into();
+            event["Body"] = output.proof.as_slice().into();
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
