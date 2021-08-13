@@ -76,14 +76,8 @@ async fn main() {
     match ret {
         Ok(output) => {
             println!("[cloud-sealer] >>>5: success");
-            println!("output.proof.as_slice()-----------------------------------------");
-            println!("output.proof.as_slice():{:#?}",output.proof.as_slice());
-            let response_rep = base64::encode(&output.proof).to_string();
-
-            println!("base64 1----------------------------------------- : {}",base64::encode(&output.proof.as_slice()).to_string());
-            println!("base64 1----------------------------------------- : {}",base64::encode(&output.proof.as_slice()).as_str());
-            println!("base64 1----------------------------------------- : {}",base64::encode(&output.proof.as_slice()));
-
+            let response_rep = base64::encode(output.proof.as_slice()).to_string();
+            println!("base64:{}",&response_rep);
             println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &response_rep.len());
 
             if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &response_rep).await {
