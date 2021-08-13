@@ -45,7 +45,7 @@ async fn main() {
     env_json["minerIDStr"] = miner_id.into();
     env_json["sectorNumber"] = sector_number.into();
 
-    let mut file = std::fs::File::create("./c2_env.json").expect("[cloud-sealer] >>>2: err! create failed!");
+    let mut file = std::fs::File::create("../env.json").expect("[cloud-sealer] >>>2: err! create failed!");
     file.write_all(env_json.dump().as_bytes()).expect("[cloud-sealer] >>>2: err! write c2_env.json file !");
     drop(file);
 
@@ -92,10 +92,9 @@ async fn main() {
             };
 
             println!("[cloud-sealer] >>>7:  write c2_event.json file...");
-            let mut file = std::fs::File::create("./c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
+            let mut file = std::fs::File::create("../c2_event.json").expect("[cloud-sealer] >>>7: err! create failed!");
             file.write_all(event.dump().as_bytes()).expect("[cloud-sealer] >>>7: err! write c2_event.json file !");
 
-            println!("[cloud-sealer] >>>7: success");
             println!("[cloud-sealer] >>>1: success main end time:{:?}", now.elapsed());
         }
         Err(err) => {
