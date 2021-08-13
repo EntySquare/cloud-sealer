@@ -5,8 +5,8 @@ USER root
 WORKDIR /root
 ADD . .
 
-RUN mkdir -p .cargo
-COPY config.toml .cargo/
+#RUN mkdir -p .cargo
+#COPY Config.toml .cargo/
 COPY Cargo.toml Cargo.lock ./
 
 RUN git clone https://github.com/EntySquare/entysnark.git ./
