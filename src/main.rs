@@ -87,7 +87,7 @@ async fn main() {
                 // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
             }
             let mut event = json::JsonValue::new_object();
-            event["Body"] = response_rep.into();
+            event["Body"] = response_rep.as_str().into();
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
