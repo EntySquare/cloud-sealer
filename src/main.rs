@@ -85,12 +85,10 @@ async fn main() {
             println!("3:{:?}", base64::encode(output.proof.as_slice()));
 
             let mut commit_2_resp = json::JsonValue::new_object();
-            commit_2_resp["Commit2Out"] = output.proof.into();
+            commit_2_resp["Commit2Out"] = output.proof.to_hex().into();//16进制
             let commit_2_resp_json = commit_2_resp.dump();
-
-            println!("commit_2_resp_json:{}", commit_2_resp_json);
-            println!("3:{:?}", base64::encode(commit_2_resp_json));
-            // println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.len());
+            println!("{}",commit_2_resp_json);
+            println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.to_hex().len());
 
             if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &String::from("")).await {
                 // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
@@ -98,7 +96,7 @@ async fn main() {
 
 
             let mut event = json::JsonValue::new_object();
-            event["Body"] = "".into();
+            event["Body"] = commit_2_resp;
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
