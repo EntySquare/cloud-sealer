@@ -9,7 +9,6 @@ RUN apt-get install -y git
 #RUN mkdir -p .cargo
 #COPY Config.toml .cargo/
 COPY Cargo.toml Cargo.lock ./
-COPY ./.gitconfig /root/.gitconfig
 
 RUN git clone https://github.com/EntySquare/entysnark.git ./
 RUN git clone https://github.com/EntySquare/filecoin-proof-debug.git ./
