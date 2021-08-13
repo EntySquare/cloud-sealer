@@ -26,7 +26,7 @@ pub struct MyEnv {
     job_node_name: String,
 }
 
-pub fn structure_env() -> (u64, u64, String, String) {
+pub fn structure_env() -> (u64, u64, String, String,String) {
     let miner_id = match env::var("SECTOR_MINER_ID") {
         Ok(val) => val.parse::<u64>().unwrap(),
         Err(..) => panic!("env SECTOR_MINER_ID is null!!!"),
@@ -43,7 +43,11 @@ pub fn structure_env() -> (u64, u64, String, String) {
         Ok(val) => val,
         Err(..) => panic!("env TASK_TYPE is null!!!"),
     };
-    (miner_id, sector_number, miner_ip, task_typ)
+    let nats_url = match env::var("NATS_SERVER") {
+        Ok(val) => val,
+        Err(..) => String::from("http://localhost:4222"),
+    };
+    (miner_id, sector_number, miner_ip, task_typ,nats_url)
 }
 // pub fn structure_env_test() -> (u64, u64, String, String) {
 //     let miner_id = match env::var("SECTOR_MINER_ID") {
