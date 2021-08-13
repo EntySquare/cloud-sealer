@@ -5,6 +5,7 @@ use tokio::time::Instant;
 use crate::http::{post_params, post_response};
 use std::any::Any;
 use std::io::Write;
+
 extern crate json;
 
 mod api;
@@ -37,7 +38,7 @@ async fn main() {
     let miner_ip = date.2;
     let task_type = date.3;
     let nats_url = date.4;
-    println!("[cloud-sealer] >>>2: env date [miner_id:{}] [sector_number:{}] [miner_ip:{}] [task_type:{}]", miner_id,sector_number,miner_ip,task_type);
+    println!("[cloud-sealer] >>>2: env date [miner_id:{}] [sector_number:{}] [miner_ip:{}] [task_type:{}]", miner_id, sector_number, miner_ip, task_type);
 
     let mut env_json = json::JsonValue::new_object();
     env_json["natsUrl"] = nats_url.as_str().into();
@@ -60,11 +61,11 @@ async fn main() {
         base64::decode(d[1]).unwrap().as_slice()
     ).expect("serde_json enty_proofs_api.SealCommitPhase1Output err 001");
 
-    println!("[cloud-sealer] >>>4: json api::SealCommitPhase1Output [registered_proof:{:?}] [vanilla_proofs:{:?}] [comm_r:{:?}] [comm_d:{:?}] [replica_id:{:?}] [seed:{:?}] [ticket:{:?}]", scp1o2.registered_proof, scp1o2.vanilla_proofs.type_id(), scp1o2.comm_r.len(),scp1o2.comm_d.len(),scp1o2.replica_id,scp1o2.seed.len(),scp1o2.ticket.len());
+    println!("[cloud-sealer] >>>4: json api::SealCommitPhase1Output [registered_proof:{:?}] [vanilla_proofs:{:?}] [comm_r:{:?}] [comm_d:{:?}] [replica_id:{:?}] [seed:{:?}] [ticket:{:?}]", scp1o2.registered_proof, scp1o2.vanilla_proofs.type_id(), scp1o2.comm_r.len(), scp1o2.comm_d.len(), scp1o2.replica_id, scp1o2.seed.len(), scp1o2.ticket.len());
 
     //run c2
     let prover_id = types::miner_id_to_prover_id(miner_id);
-    println!("[cloud-sealer] >>>5: run fn seal_commit_phase2_inner date [miner_id:{:?}] [sector_number:{:?}] [prover_id:{:?}]", miner_id,sector_number,prover_id);
+    println!("[cloud-sealer] >>>5: run fn seal_commit_phase2_inner date [miner_id:{:?}] [sector_number:{:?}] [prover_id:{:?}]", miner_id, sector_number, prover_id);
     let ret = with_shape!(
         u64::from(scp1o2.registered_proof.sector_size()),
         seal_commit_phase2_inner,
@@ -77,9 +78,9 @@ async fn main() {
         Ok(output) => {
             println!("[cloud-sealer] >>>5: success");
 
-            println!("output-str: {:?}",std::str::from_utf8(&output.proof).unwrap());
-            let response_rep = base64::encode(output.proof.as_slice()).to_string();
-            println!("base64:{}",&response_rep);
+            let response_rep = base64::encode(std::str::from_utf8(&output.proof).unwrap().as_bytes());
+
+            println!("base64:{}", &response_rep);
             println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &response_rep.len());
 
             if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &response_rep).await {
