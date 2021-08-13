@@ -1,7 +1,7 @@
 # FROM rust:1.50-prebuilt as builder
 FROM rust:latest AS builder1
 
-USER=root
+USER root
 WORKDIR /root
 ADD . .
 
