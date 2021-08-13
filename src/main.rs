@@ -92,7 +92,7 @@ async fn main() {
             }
 
             let mut event = json::JsonValue::new_object();
-            event["Body"] = commit_2_resp_json.as_bytes().into();
+            event["Body"] = base64::encode(commit_2_resp_json.as_bytes()).into();
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
