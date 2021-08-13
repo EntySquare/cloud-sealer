@@ -77,8 +77,10 @@ async fn main() {
     match ret {
         Ok(output) => {
             println!("[cloud-sealer] >>>5: success");
-
-            let response_rep = base64::encode(std::str::from_utf8(&output.proof).unwrap().as_bytes());
+            let proof= std::str::from_utf8(&output.proof).unwrap().as_bytes();
+            println!("{:?}",&proof);
+            println!("{:?}",&proof);
+            let response_rep = base64::encode(std::str::from_utf8(proof).unwrap().as_bytes());
 
             println!("base64:{}", &response_rep);
             println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &response_rep.len());
