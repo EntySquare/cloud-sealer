@@ -18,7 +18,6 @@ WORKDIR /root/filecoin-proof-debug
 RUN cargo build
 
 WORKDIR /root/cloud-sealer
-#RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
 FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
