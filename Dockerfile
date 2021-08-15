@@ -7,9 +7,6 @@ WORKDIR /root
 RUN mkdir cloud-sealer
 COPY . /root/cloud-sealer
 RUN apt-get update && apt-get install -y git
-#RUN mkdir -p .cargo
-#COPY Config.toml .cargo/
-#COPY Cargo.toml Cargo.lock ./
 
 RUN git clone -b 2080ti https://github.com/EntySquare/entysnark.git
 WORKDIR /root/entysnark
@@ -25,12 +22,22 @@ WORKDIR /root/cloud-sealer
 RUN cargo clean
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
-#FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04
+FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
+ENV GOPROXY "https://goproxy.cn"
+ENV GO111MODULE on
+USER root
+WORKDIR /root
+RUN git clone https://github.com/EntySquare/cloud-element.git
+WORKDIR /root/cloud-element
+RUN go mod download
+RUN apt-get update && apt-get install -y libhwloc-dev && go build
+
 FROM nvidia/opencl:runtime-ubuntu18.04
 WORKDIR /root
 RUN apt-get update && apt-get install -y hwloc
 COPY --from=builder1 /root/cloud-sealer/cloud-sealer .
-COPY --from=cloud-element /root/cloud-element/cloud-element .
+#COPY --from=cloud-element /root/cloud-element/cloud-element .
+COPY --from=builder2 /root/cloud-element/cloud-element .
 
 EXPOSE 4222 7788 9999
 #ENTRYPOINT ["/$APP"]
