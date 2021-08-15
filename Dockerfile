@@ -8,12 +8,12 @@ RUN mkdir cloud-sealer
 COPY . /root/cloud-sealer
 RUN apt-get update && apt-get install -y git
 
-RUN git clone -b 2080ti https://github.com/EntySquare/entysnark.git
+RUN git clone -b 2080ti http://github.com/EntySquare/entysnark.git
 WORKDIR /root/entysnark
 RUN cargo check
 
 WORKDIR /root
-RUN git clone https://github.com/EntySquare/filecoin-proof-debug.git
+RUN git clone http://github.com/EntySquare/filecoin-proof-debug.git
 WORKDIR /root/filecoin-proof-debug
 RUN cargo check
 
@@ -27,7 +27,7 @@ ENV GOPROXY "https://goproxy.cn"
 ENV GO111MODULE on
 USER root
 WORKDIR /root
-RUN git clone https://github.com/EntySquare/cloud-element.git
+RUN git clone http://github.com/EntySquare/cloud-element.git
 WORKDIR /root/cloud-element
 RUN go mod download
 RUN apt-get update && apt-get install -y libhwloc-dev && go build
