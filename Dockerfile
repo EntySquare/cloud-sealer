@@ -10,16 +10,15 @@ RUN apt-get update && apt-get install -y git
 
 RUN git clone -b 2080ti http://github.com/EntySquare/entysnark.git
 WORKDIR /root/entysnark
-RUN cargo check
+RUN cargo build
 
 WORKDIR /root
 RUN git clone http://github.com/EntySquare/filecoin-proof-debug.git
 WORKDIR /root/filecoin-proof-debug
-RUN cargo check
+RUN cargo build
 
 WORKDIR /root/cloud-sealer
 #RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
-RUN cargo clean
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
 FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
