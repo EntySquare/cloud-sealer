@@ -78,7 +78,8 @@ async fn main() {
     match ret {
         Ok(output) => {
             println!("[cloud-sealer] >>>5: success");
-            let proof16 =  output.proof.to_hex();
+            let proof16 =  output.proof.to_hex();//最终go打印出的格式一致
+
             println!("proof_16:{:?}", proof16);
 
             let mut commit_2_resp = json::JsonValue::new_object();
