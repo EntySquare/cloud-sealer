@@ -83,17 +83,18 @@ async fn main() {
             println!("proof_16:{:?}", proof16);
 
             let mut commit_2_resp = json::JsonValue::new_object();
-            commit_2_resp["Commit2Out"] = base64::encode(proof16).into();//16进制
-            let commit_2_resp_json = commit_2_resp.dump();
-            println!("{}", commit_2_resp_json);
-            println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.to_hex().len());
+            commit_2_resp["Commit2Out"] = base64::encode(String::from_utf8(output.proof).unwrap()).into();
+            let commit_2_resp_json_base64 = base64::encode(commit_2_resp.dump());
+            println!("{}",commit_2_resp_json_base64);
 
-            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &base64::encode(commit_2_resp_json.as_bytes())).await {
+            println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &commit_2_resp_json_base64.len());
+
+            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &commit_2_resp_json_base64).await {
                 // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
             }
 
             let mut event = json::JsonValue::new_object();
-            event["Body"] = base64::encode(commit_2_resp_json.as_bytes()).into();
+            event["Body"] = commit_2_resp_json_base64.into();
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
