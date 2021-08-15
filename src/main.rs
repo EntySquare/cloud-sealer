@@ -5,6 +5,7 @@ use tokio::time::Instant;
 use crate::http::{post_params, post_response};
 use std::any::Any;
 use std::io::Write;
+use rustc_serialize::hex::ToHex;
 
 extern crate json;
 
@@ -77,26 +78,22 @@ async fn main() {
     match ret {
         Ok(output) => {
             println!("[cloud-sealer] >>>5: success");
-            // let proof= String::from_utf8(output.proof).unwrap();
-            // println!("{:?}",&proof);
-            // let response_rep = base64::encode();
-            println!("1:{:?}", output.proof);
-            println!("2:{:?}", output.proof.as_slice());
-            println!("3:{:?}", base64::encode(output.proof.as_slice()));
+            let proof16 =  output.proof.to_hex();//最终go打印出的格式一致
+
+            println!("proof_16:{:?}", proof16);
 
             let mut commit_2_resp = json::JsonValue::new_object();
-            commit_2_resp["Commit2Out"] = output.proof.to_hex().into();//16进制
+            commit_2_resp["Commit2Out"] = base64::encode(proof16).into();//16进制
             let commit_2_resp_json = commit_2_resp.dump();
-            println!("{}",commit_2_resp_json);
+            println!("{}", commit_2_resp_json);
             println!("[cloud-sealer] >>>6: post {} proof.len: {}", format!("http://{}:9999/response", &miner_ip), &output.proof.to_hex().len());
 
-            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &String::from("")).await {
+            if let Ok(res) = post_response(&miner_ip, &sector_number.to_string(), &task_type, &base64::encode(commit_2_resp_json.as_bytes())).await {
                 // println!("[cloud-sealer] >>>6: post {} return", format!("http://{}:9999/response", &miner_ip), res);
             }
 
-
             let mut event = json::JsonValue::new_object();
-            event["Body"] = commit_2_resp;
+            event["Body"] = base64::encode(commit_2_resp_json.as_bytes()).into();
             event["Head"] = {
                 let mut head = json::JsonValue::new_object();
                 head["MsgTyp"] = task_type.as_str().into();
