@@ -25,22 +25,12 @@ WORKDIR /root/cloud-sealer
 RUN cargo clean
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
-#FROM golang:1.15 AS builder2
-#ENV GOPROXY "https://goproxy.cn"
-#ENV GO111MODULE on
-#USER root
-#WORKDIR /root
-#
-#ADD ./cloud-element .
-#COPY go.mod go.sum ./
-#RUN go mod download
-
 #FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04
 FROM nvidia/opencl:runtime-ubuntu18.04
+WORKDIR /root
 RUN apt-get update && apt-get install -y hwloc
-COPY --from=builder1 /usr/local/cargo/bin/cloud-sealer /cloud-sealer
-#COPY --from=builder2 /usr/local/cargo/bin/cloud-element /cloud-element
-COPY --from=cloud-element /usr/local/cargo/bin/cloud-element /cloud-element
+COPY --from=builder1 /root/cloud-sealer/cloud-sealer .
+COPY --from=cloud-element /root/cloud-element/cloud-element .
 
 EXPOSE 4222 7788 9999
 #ENTRYPOINT ["/$APP"]
