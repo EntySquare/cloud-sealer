@@ -80,8 +80,10 @@ async fn main() {
             println!("[cloud-sealer] >>>5: success");
             println!("proof_16:{:?}", output.proof.to_hex());
 
+            let output_proof_str = unsafe { String::from_utf8_unchecked(output.proof) };
+
             let mut commit_2_resp = json::JsonValue::new_object();
-            commit_2_resp["Commit2Out"] = base64::encode(String::from_utf8(output.proof).unwrap()).into();
+            commit_2_resp["Commit2Out"] = base64::encode(output_proof_str).into();
             let commit_2_resp_json_base64 = base64::encode(commit_2_resp.dump());
             println!("{}",commit_2_resp_json_base64);
 
