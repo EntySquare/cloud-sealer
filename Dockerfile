@@ -21,6 +21,7 @@ RUN git clone https://hub.fastgit.org/EntySquare/filecoin-proof-debug.git
 WORKDIR /root/cloud-sealer
 RUN apt update
 RUN /root/.cargo/bin/rustup install nightly
+RUN /root/.cargo/bin/rustc --version
 RUN /root/.cargo/bin/rustup default nightly
 #RUN /root/.cargo/bin/rustup update
 
