@@ -5,7 +5,6 @@ FROM rustdocker/rustfmt_clippy:nightly AS builder1
 USER root
 WORKDIR /root
 RUN mkdir cloud-sealer
-RUN mkdir .cargo
 COPY ./params/config .cargo/config
 COPY . /root/cloud-sealer
 #RUN apt-get update && apt-get install -y git
