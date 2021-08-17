@@ -25,7 +25,7 @@ RUN /root/.cargo/bin/rustc --version
 RUN /root/.cargo/bin/rustup default nightly
 #RUN /root/.cargo/bin/rustup update
 
-RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc bzr jq pkg-config clang build-essential hwloc libhwloc-dev -y && apt upgrade -y
+RUN apt install openssl openssl-dev mesa-opencl-icd ocl-icd-opencl-dev gcc bzr jq pkg-config clang build-essential hwloc libhwloc-dev -y && apt upgrade -y
 RUN /root/.cargo/bin/cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
 FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
