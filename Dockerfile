@@ -11,16 +11,16 @@ COPY . /root/cloud-sealer
 
 RUN git clone -b 2080ti https://hub.fastgit.org/EntySquare/entysnark.git
 WORKDIR /root/entysnark
-RUN cargo build
+RUN /root/.cargo/bin/cargo build
 
 WORKDIR /root
 RUN git clone https://hub.fastgit.org/EntySquare/filecoin-proof-debug.git
 WORKDIR /root/filecoin-proof-debug
-RUN cargo build
+RUN /root/.cargo/bin/cargo build
 
 WORKDIR /root/cloud-sealer
 RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl clang build-essential hwloc libhwloc-dev wget -y && apt upgrade -y
-RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
+RUN /root/.cargo/bin/cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
 FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
 ENV GOPROXY "https://goproxy.cn"
