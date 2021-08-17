@@ -41,7 +41,7 @@ RUN go build
 FROM nvidia/opencl:runtime-ubuntu18.04
 WORKDIR /root
 RUN apt-get update && apt-get install -y hwloc
-COPY --from=builder1 /root/cloud-sealer/cloud-sealer .
+COPY --from=builder1 /root/cloud-sealer/target/release/cloud-sealer .
 #COPY --from=cloud-sealer-sidecar /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
 COPY --from=builder2 /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
 
