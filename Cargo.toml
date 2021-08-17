@@ -18,7 +18,7 @@ bls-signatures = { version = "0.10.0", default-features = false, features = ["bl
 blstrs = { version = "0.3" }
 storage-proofs-porep = { version = "~8.0.1", default-features = false }
 paired = { version = "0.22.0" }
-anyhow = { version = "1.0.42" }
+anyhow = "=1.0.42"
 unsigned-varint = "0.7.0"
 resize-slice = "0.1.3"
 filecoin-hashers = "3.0.3"
