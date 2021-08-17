@@ -21,6 +21,7 @@ RUN git clone https://hub.fastgit.org/EntySquare/filecoin-proof-debug.git
 WORKDIR /root/cloud-sealer
 RUN apt update
 RUN /root/.cargo/bin/rustup install nightly
+RUN /root/.cargo/bin/rustup default nightly
 #RUN /root/.cargo/bin/rustup update
 
 RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc bzr jq pkg-config clang build-essential hwloc libhwloc-dev -y && apt upgrade -y
