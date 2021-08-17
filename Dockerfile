@@ -1,5 +1,5 @@
 # FROM rust:1.50-prebuilt as builder
-FROM rust:latest AS builder1
+FROM rustdocker/rustfmt_clippy AS builder1
 #FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder1
 
 USER root
