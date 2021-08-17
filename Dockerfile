@@ -6,7 +6,7 @@ USER root
 WORKDIR /root
 RUN mkdir cloud-sealer
 COPY . /root/cloud-sealer
-RUN apt-get update && apt-get install -y git
+#RUN apt-get update && apt-get install -y git
 
 RUN git clone -b 2080ti https://hub.fastgit.org/EntySquare/entysnark.git
 WORKDIR /root/entysnark
@@ -18,7 +18,7 @@ WORKDIR /root/filecoin-proof-debug
 RUN cargo build
 
 WORKDIR /root/cloud-sealer
-RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl clang build-essential hwloc libhwloc-dev wget -y && sudo apt upgrade -y
+RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl clang build-essential hwloc libhwloc-dev wget -y && apt upgrade -y
 RUN cargo build --release --no-default-features --features multicore-sdr --features pairing,gpu
 
 FROM registry.cn-shanghai.aliyuncs.com/filtab/filecoin-ubuntu:nvidia-opencl-devel-ubuntu18.04 AS builder2
