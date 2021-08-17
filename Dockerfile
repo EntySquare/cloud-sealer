@@ -35,8 +35,8 @@ USER root
 WORKDIR /root
 RUN git clone https://hub.fastgit.org/EntySquare/cloud-sealer-sidecar.git
 WORKDIR /root/cloud-sealer-sidecar
-RUN go mod download
-RUN apt-get update && apt-get install -y libhwloc-dev && go build
+RUN go mod tidy
+RUN go build
 
 FROM nvidia/opencl:runtime-ubuntu18.04
 WORKDIR /root
