@@ -5,7 +5,7 @@
 #registry = "git://mirrors.ustc.edu.cn/crates.io-index/"
 
 [source.crates-io]
-replace-with = 'tuna'
+replace-with = 'sjtu'
 
 # 清华大学
 [source.tuna]
