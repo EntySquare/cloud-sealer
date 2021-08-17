@@ -40,5 +40,4 @@ COPY --from=builder1 /root/cloud-sealer/cloud-sealer .
 #COPY --from=cloud-sealer-sidecar /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
 COPY --from=builder2 /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
 
-EXPOSE 7788
 #ENTRYPOINT ["/$APP"]
