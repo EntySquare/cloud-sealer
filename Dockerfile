@@ -36,7 +36,7 @@ WORKDIR /root
 RUN git clone https://hub.fastgit.org/EntySquare/cloud-sealer-sidecar.git
 WORKDIR /root/cloud-sealer-sidecar
 RUN go mod tidy
-RUN go build
+RUN go build -o cloud-sealer-sidecar
 
 FROM nvidia/opencl:runtime-ubuntu18.04
 WORKDIR /root
