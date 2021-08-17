@@ -10,13 +10,13 @@ COPY . /root/cloud-sealer
 #RUN apt-get update && apt-get install -y git
 
 RUN git clone -b 2080ti https://hub.fastgit.org/EntySquare/entysnark.git
-WORKDIR /root/entysnark
-RUN /root/.cargo/bin/cargo build
+#WORKDIR /root/entysnark
+#RUN /root/.cargo/bin/cargo build
 
 WORKDIR /root
 RUN git clone https://hub.fastgit.org/EntySquare/filecoin-proof-debug.git
-WORKDIR /root/filecoin-proof-debug
-RUN /root/.cargo/bin/cargo build
+#WORKDIR /root/filecoin-proof-debug
+#RUN /root/.cargo/bin/cargo build
 
 WORKDIR /root/cloud-sealer
 RUN apt install mesa-opencl-icd ocl-icd-opencl-dev gcc git bzr jq pkg-config curl clang build-essential hwloc libhwloc-dev wget -y && apt upgrade -y
