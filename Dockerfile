@@ -40,7 +40,7 @@ RUN go build -o cloud-sealer-sidecar
 
 FROM nvidia/opencl:runtime-ubuntu18.04
 WORKDIR /root
-RUN apt-get update && apt-get install -y hwloc
+RUN apt-get update && apt-get install -y hwloc openssl libssl-dev
 COPY --from=builder1 /root/cloud-sealer/target/release/cloud-sealer .
 #COPY --from=cloud-sealer-sidecar /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
 COPY --from=builder2 /root/cloud-sealer-sidecar/cloud-sealer-sidecar .
